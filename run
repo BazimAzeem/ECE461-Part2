@@ -1,0 +1,24 @@
+#!/bin/bash
+
+if [[ $1 == "help" ]]
+then
+    echo "possible commands: help install uninstall build clean test run"
+elif [[ $1 == "install" ]]
+then
+    echo "TODO"
+elif [[ $1 == "uninstall" ]]
+then
+    echo "TODO"
+elif [[ $1 == "build" ]]
+then
+    echo "TODO"
+elif [[ $1 == "clean" ]]
+then
+    echo "TODO"
+elif [[ $1 == "test" ]]
+then
+    echo "TODO"
+else
+    echo "TODO"
+    ./ECE461-Project-Part1-Handoff-CLI/run "$@"
+fi

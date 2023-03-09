@@ -1,0 +1,12 @@
+version: "3"
+
+services:
+  project2:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      target: base
+     
+    image: ece461_project2:latest
+
+    command: bash -c "tail -f /dev/null" 
