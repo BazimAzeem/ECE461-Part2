@@ -1,0 +1,3 @@
+[submodule "ECE461-Project-Part1-Handoff-CLI"]
+	path = ECE461-Project-Part1-Handoff-CLI
+	url = https://github.com/BazimAzeem/ECE461-Project-Part1-Handoff-CLI.git
