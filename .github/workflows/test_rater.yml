@@ -1,0 +1,18 @@
+# This workflow will test the package rater
+
+name: Test rater
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  test_rater:
+    name: Test rater
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Test rater
+      run: ./ECE461-Project-Part1-Handoff-CLI/run test
