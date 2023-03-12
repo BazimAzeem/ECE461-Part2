@@ -23,6 +23,9 @@ jobs:
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 6.0.x
+    - name: Install dependencies
+      working-directory: ECE461-Project-Part1-Handoff-CLI
+      run: ./run install
     - name: Test rater
       working-directory: ECE461-Project-Part1-Handoff-CLI
       run: ./run test
