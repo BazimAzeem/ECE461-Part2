@@ -15,4 +15,5 @@ jobs:
 
     steps:
     - name: Test rater
-      run: ./ECE461-Project-Part1-Handoff-CLI/run test
+      working-directory: ./ECE461-Project-Part1-Handoff-CLI
+      run: ./run test
