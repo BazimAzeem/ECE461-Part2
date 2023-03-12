@@ -1,0 +1,28 @@
+# This workflow will test the package rater
+
+name: Test rater
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+  workflow_dispatch:
+
+jobs:
+  test_rater:
+    name: Test rater
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 6.0.x
+    - name: Test rater
+      working-directory: ECE461-Project-Part1-Handoff-CLI
+      run: ./run test
