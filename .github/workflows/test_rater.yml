@@ -19,7 +19,4 @@ jobs:
     
     - name: Test rater
       working-directory: ECE461-Project-Part1-Handoff-CLI
-      run: |
-        pwd
-        ls
-        echo 'This is a random message used for debugging'
+      run: ./run test
