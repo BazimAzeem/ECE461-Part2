@@ -22,4 +22,6 @@ jobs:
       run: |
         pwd
         ls
+        cd ECE461-Project-Part1-Handoff-CLI
+        ls
         echo "this is a test debug"
