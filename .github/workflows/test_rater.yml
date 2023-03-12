@@ -20,9 +20,4 @@ jobs:
         submodules: recursive
     - name: Test rater
       working-directory: ECE461-Project-Part1-Handoff-CLI
-      run: |
-        pwd
-        echo "list"
-        ls
-        echo "end list"
-
+      run: ./run test
