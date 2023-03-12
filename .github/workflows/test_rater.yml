@@ -21,4 +21,5 @@ jobs:
       working-directory: ECE461-Project-Part1-Handoff-CLI
       run: |
         ls -la
+        pwd
         echo 'This is a random message used for debugging'
