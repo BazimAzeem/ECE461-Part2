@@ -10,8 +10,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  test_rater:
-    name: Test rater
+  test-rater:
+    name: Test Rater
     runs-on: ubuntu-latest
 
     steps:
