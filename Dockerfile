@@ -1,6 +1,6 @@
 FROM ubuntu:jammy AS base
 
-RUN apt update
+RUN apt-get update
 
 WORKDIR /home/
 RUN mkdir project2

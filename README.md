@@ -3,13 +3,12 @@
 Team members: Bazim Azeem, Andy Helton, Ishaan Laroia, Alec Pannunzio
 
 
-# installation
+## Installation
 none
 
 
-# running
-
+## Running
 run the command: 
-~~~
+~~~shell
 docker compose up
 ~~~
