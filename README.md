@@ -8,7 +8,7 @@ none
 
 
 ## Running
-run the command: 
+run the command:
 ~~~shell
 docker compose up
 ~~~
