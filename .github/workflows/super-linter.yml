@@ -24,10 +24,6 @@ jobs:
           submodules: recursive
           # Full git history is needed to get a proper list of changed files within `super-linter`
           fetch-depth: 0
-      - name: Test submodule
-        run: |
-          cd ECE461-Project-Part1-Handoff-CLI
-          ls
       - name: Lint code base
         uses: github/super-linter@v4
         env:
