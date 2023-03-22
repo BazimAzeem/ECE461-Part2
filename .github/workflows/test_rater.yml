@@ -1,6 +1,6 @@
 # This workflow will test the package rater
 
-name: Test rater
+name: Test Rater
 
 on:
   push:
