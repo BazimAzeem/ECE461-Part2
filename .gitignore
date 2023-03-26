@@ -1,3 +1,5 @@
+.env
+
 /PackageRegistry/bin
 /PackageRegistry/obj
 /cache/
