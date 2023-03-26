@@ -1,5 +1,6 @@
 /PackageRegistry/bin
 /PackageRegistry/obj
+/cache/
 
 log.txt
 
