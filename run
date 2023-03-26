@@ -5,20 +5,27 @@ then
     echo "possible commands: help install uninstall build clean test run"
 elif [[ $1 == "install" ]]
 then
+    cd ECE461-Project-Part1-Handoff-CLI && ./run install && cd ..
     echo "TODO"
 elif [[ $1 == "uninstall" ]]
 then
     echo "TODO"
 elif [[ $1 == "build" ]]
 then
-    echo "TODO"
+    cd ECE461-Project-Part1-Handoff-CLI && ./run build && cd ..
+    cd PackageRegistry && dotnet build && cd ..
+    
 elif [[ $1 == "clean" ]]
 then
-    echo "TODO"
+    cd ECE461-Project-Part1-Handoff-CLI && ./run clean && cd ..
+    cd PackageRegistry && dotnet clean && cd ..
 elif [[ $1 == "test" ]]
 then
-    echo "TODO"
+    cd ECE461-Project-Part1-Handoff-CLI && ./run test && cd ..
+    cd PackageRegistry && dotnet test && cd ..
 else
-    echo "TODO"
-    ./ECE461-Project-Part1-Handoff-CLI/run "$@"
+
+    cd PackageRegistry
+    dotnet run "$@"
+    # ./ECE461-Project-Part1-Handoff-CLI/run "$@"
 fi
