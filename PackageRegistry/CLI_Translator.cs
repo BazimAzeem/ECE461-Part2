@@ -16,7 +16,7 @@ namespace PackageRegistry
         }
 
         public void CalculateMetrics() {
-            
+            // TODO call bad CLI For the url and metrics of the other project
         }
     }
 }

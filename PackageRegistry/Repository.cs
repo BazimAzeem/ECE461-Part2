@@ -12,14 +12,33 @@ namespace PackageRegistry
         }
     }
     
+    public class DependancySpec {
+        public Version lowerBound = null;
+        public Version uppperBound = null;
+        public Repository selectedRepo = null;
+    }
+
     public class Repository
     {
         string url;
         CLI_Translator metrics_calculator;
 
+        List<DependancySpec> Dependancies;
+
         public Repository(string url) {
             this.url = url;
             metrics_calculator = new CLI_Translator(url, this);
+
+            metrics_calculator.CalculateMetrics();
+
+            RetrieveDependancies();
+        }
+
+        RetrieveDependancies() {
+            Dependancies = new List<Repository>();
+            
+            // TODO somehow build Dependancies
+
         }
     }
 }
