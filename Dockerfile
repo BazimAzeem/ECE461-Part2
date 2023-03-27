@@ -9,5 +9,6 @@ WORKDIR /home/project2
 COPY . .
 RUN ls
 
+RUN git submodule update --init --recursive
 RUN ./ECE461-Project-Part1-Handoff-CLI/run install && ./ECE461-Project-Part1-Handoff-CLI/run build
 RUN ./run install && ./run build
