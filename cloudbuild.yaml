@@ -1,7 +1,6 @@
 steps:
-- name: Checkout code
-  uses: actions/checkout@v3
-  with:
+- name: 'gcr.io/cloud-builders/git'
+  args: ['submodule', 'update', '--init', '--recursive']
     submodules: recursive
   args: [ 'build', '-t', 'us.gcr.io/$PROJECT_ID/ece461_project2:latest', '.' ]
 
