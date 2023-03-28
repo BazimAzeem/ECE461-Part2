@@ -1,6 +1,11 @@
 steps:
 - name: 'gcr.io/cloud-builders/git'
-  args: ['submodule', 'update', '--init', '--recursive']
+  entrypoint: 'bash'
+  args:
+  - -c
+  - |
+  git config -f .gitmodules submodule.src/my-repo.url https://source.developers.google.com/p/my-project/r/my-repo
+  git submodule update --init
 - name: 'gcr.io/cloud-builders/docker'
   args: [ 'build', '-t', 'us.gcr.io/$PROJECT_ID/ece461_project2:latest', '.' ]
 
