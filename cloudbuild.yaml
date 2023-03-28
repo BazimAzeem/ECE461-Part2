@@ -4,4 +4,4 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   args: [ 'build', '-t', 'us.gcr.io/$PROJECT_ID/ece461_project2:latest', '.' ]
 
-images: [eu.gcr.io/$PROJECT_ID/ece461_project2:latest]
+images: [us.gcr.io/$PROJECT_ID/ece461_project2:latest]
