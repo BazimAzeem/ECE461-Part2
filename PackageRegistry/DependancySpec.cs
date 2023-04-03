@@ -15,11 +15,13 @@ namespace PackageRegistry
 
         public bool versionSelected = false, traversed = false;
 
-        public DependancySpec(string name, Version oldBound, Version latestBound) {
+        public DependancySpec(string name, Version oldBound, Version latestBound)
+        {
             this.name = name; this.oldBound = oldBound; this.latestBound = latestBound;
         }
 
-        public Repository SelectVersion() {
+        public Repository SelectVersion()
+        {
             return null;
         }
     }

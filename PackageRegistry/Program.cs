@@ -7,7 +7,8 @@ namespace PackageRegistry
 {
     public class Program
     {
-        public static void Main(String[] args) {
+        public static void Main(String[] args)
+        {
             Console.WriteLine("hello");
         }
     }

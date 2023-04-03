@@ -25,7 +25,7 @@ then
     cd PackageRegistry && dotnet test && cd ..
 else
 
-    cd PackageRegistry
+    cd PackageRegistry || exit
     dotnet run "$@"
     # ./ECE461-Project-Part1-Handoff-CLI/run "$@"
 fi
