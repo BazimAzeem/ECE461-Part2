@@ -12,11 +12,7 @@ namespace PackageRegistry
         }
     }
     
-    public class DependancySpec {
-        public Version lowerBound = null;
-        public Version uppperBound = null;
-        public Repository selectedRepo = null;
-    }
+   
 
     public class Repository
     {
@@ -34,8 +30,8 @@ namespace PackageRegistry
             RetrieveDependancies();
         }
 
-        RetrieveDependancies() {
-            Dependancies = new List<Repository>();
+        void RetrieveDependancies() {
+            Dependancies = new List<DependancySpec>();
             
             // TODO somehow build Dependancies
 
