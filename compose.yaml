@@ -9,4 +9,4 @@ services:
      
     image: ece461_project2:latest
 
-    command: bash -c "tail -f /dev/null" 
+    command: bash -c "./run" 
