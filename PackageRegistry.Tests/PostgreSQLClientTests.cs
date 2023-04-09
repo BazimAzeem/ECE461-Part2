@@ -17,7 +17,7 @@ public class PostgreSQLClientTests
     [Test]
     public void Test1()
     {
-        postgresClient.SelectAllPackages();
+        postgresClient.SelectFromPackage();
         Assert.Pass();
     }
 }
