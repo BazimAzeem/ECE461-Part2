@@ -14,11 +14,11 @@ namespace PackageRegistry
         }
     }
 
-    public class Repository
+    public class Package
     {
         List<DependancySpec> Dependancies;
 
-        public Repository()
+        public Package()
         {
             RetrieveDependancies();
         }
@@ -34,25 +34,25 @@ namespace PackageRegistry
 
     }
 
-    public class FileRepository : Repository
+    public class FilePackage : Package
     {
         string filepath;
 
-        public FileRepository(string filepath)
+        public FilePackage(string filepath)
         {
             this.filepath = filepath;
         }
 
     }
 
-    public class NPMRepository : Repository
+    public class NPMPackage : Package
     {
         string url;
         CLI_Translator metrics_calculator;
 
 
 
-        public NPMRepository(string url)
+        public NPMPackage(string url)
         {
             this.url = url;
             metrics_calculator = new CLI_Translator(url, this);
