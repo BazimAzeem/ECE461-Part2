@@ -8,14 +8,16 @@ namespace PackageRegistry
     public class CLI_Translator
     {
         string packageUrl;
-        Repository parentRepository;
+        Package parentPackage;
 
-        public CLI_Translator(string url, Repository parent) {
+        public CLI_Translator(string url, Package parent)
+        {
             this.packageUrl = url;
-            this.parentRepository = parent;
+            this.parentPackage = parent;
         }
 
-        public void CalculateMetrics() {
+        public void CalculateMetrics()
+        {
             // TODO call bad CLI For the url and metrics of the other project
         }
     }
