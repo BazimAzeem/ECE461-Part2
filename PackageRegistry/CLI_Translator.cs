@@ -10,12 +10,14 @@ namespace PackageRegistry
         string packageUrl;
         Repository parentRepository;
 
-        public CLI_Translator(string url, Repository parent) {
+        public CLI_Translator(string url, Repository parent)
+        {
             this.packageUrl = url;
             this.parentRepository = parent;
         }
 
-        public void CalculateMetrics() {
+        public void CalculateMetrics()
+        {
             // TODO call bad CLI For the url and metrics of the other project
         }
     }
