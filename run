@@ -1,5 +1,9 @@
 #!/bin/bash
 
+if [ ! -f ".env" ]; then
+    touch .env
+fi
+
 if [[ $1 == "help" ]]
 then
     echo "possible commands: help install uninstall build clean test run"
