@@ -47,7 +47,7 @@ namespace IO.Swagger.Controllers
             // return StatusCode(200, default(string));
 
             //TODO: Uncomment the next line to return response 400 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            //return StatusCode(400);
+            // return StatusCode(400);
 
             //TODO: Uncomment the next line to return response 401 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
             // return StatusCode(401);
