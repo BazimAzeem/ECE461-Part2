@@ -42,6 +42,7 @@ namespace PackageRegistry.MetricsCalculation
 			metrics.Add(new BusFactor(this));
 			metrics.Add(new ResponsiveMaintainer(this));
 			metrics.Add(new LicenseMetric(this));
+			metrics.Add(new PRRatio(this));
 
 			// start the metrics calculating
 			foreach (Metric m in metrics) {

@@ -12,7 +12,7 @@ namespace PackageRegistry
 
 
 		// members
-		public static short LOG_LEVEL = 0; // 0 is silent, 1 means informational messages, 2 means debug messages
+		public static short LOG_LEVEL = 1; // 0 is silent, 1 means informational messages, 2 means debug messages
 		public static string LOG_FILE = "./bin/log_file.txt";
 		public static short ProgramStatus = 0;
 		public static StringBuilder log = new StringBuilder();
@@ -20,13 +20,15 @@ namespace PackageRegistry
         
         public static int Main(String[] args)
         {
-           
+			Console.WriteLine("running");
 			new Program();
 			return ProgramStatus;
 			
         }
 
         public Program() {
+
+			
 
 			// get the log level from environment variable or our class params
             string log_level_env_var = Environment.GetEnvironmentVariable("LOG_LEVEL");
@@ -47,11 +49,12 @@ namespace PackageRegistry
 			{
 				LOG_FILE = log_file_env_var;
 			}
+			Console.WriteLine(LOG_LEVEL);
 
-
-
-			var testMetricCalc = new MetricsCalculation.MetricsCalculator("https://github.com/nodejs/node");
-
+			LogDebug("hello");
+			// var testMetricCalc = new MetricsCalculation.MetricsCalculator("https://github.com/nodejs/node");
+			var testMetricCalc = new MetricsCalculation.MetricsCalculator("https://github.com/BazimAzeem/ECE461-Part2");
+			
 			testMetricCalc.Calculate();
 
 			LogInfo(testMetricCalc.ToString());

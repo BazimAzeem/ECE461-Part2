@@ -9,6 +9,9 @@ using Octokit.Internal;
 using Octokit.GraphQL;
 using static Octokit.GraphQL.Variable;
 using Connection = Octokit.GraphQL.Connection;
+using System.Net.Http;
+using System.Net.Http.Headers;
+
 
 namespace PackageRegistry.MetricsCalculation
 {
@@ -428,6 +431,110 @@ namespace PackageRegistry.MetricsCalculation
             {
                 Program.LogError("Non existent repository");
             }
+        }
+    }
+
+    public class PRRatio : Metric
+    {
+        static HttpClient httpClient = new HttpClient();
+
+        public PRRatio(MetricsCalculator parentLibrary) : base(parentLibrary)
+        {
+            this.weight = 1;
+            this.name = "PULL_REQUEST_RATIO_SCORE";
+        }
+
+        private float sigmoid(float x)
+		{
+            return 1 / (1 + (float) Math.Exp(-x));
+		}
+
+        public override async Task Calculate()
+        {
+
+            
+            Console.WriteLine("pr request metric");
+            string access_token = Environment.GetEnvironmentVariable("GITHUB_TOKEN");
+
+            
+
+            string owner = this.parentLibrary.owner;
+            string repo = this.parentLibrary.name;
+            string state = "all"; // "open" or "closed" or "all"
+
+            // Set up the HTTP client
+            httpClient.BaseAddress = new Uri("https://api.github.com/");
+            httpClient.DefaultRequestHeaders.Accept.Clear();
+            httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github+json"));
+            httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("AppName", "1.0"));
+
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Token", access_token);
+
+            // Call the API to list pull requests
+            HttpResponseMessage response = await httpClient.GetAsync($"repos/{owner}/{repo}/pulls?state={state}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                string responseContent = await response.Content.ReadAsStringAsync();
+                // Deserialize the responseContent to your desired model
+                // e.g., using Newtonsoft.Json.JsonConvert.DeserializeObject<T>(responseContent)
+                // Console.WriteLine(responseContent);
+                Console.WriteLine("json received. TODO paRSE");
+                // TODO parse json
+            }
+            else
+            {
+                Program.LogError($"Failed to list pull requests. Status code: {response.StatusCode}");
+            }
+
+            // get number of commits
+            response = await httpClient.GetAsync($"repos/{owner}/{repo}/commits");
+
+            if (response.IsSuccessStatusCode)
+            {
+                string responseContent = await response.Content.ReadAsStringAsync();
+                // Deserialize the response content to an array of commit objects
+                var commits = Newtonsoft.Json.JsonConvert.DeserializeObject<Commit[]>(responseContent);
+                Console.WriteLine($"Total commits in the repository: {commits.Length}");
+
+                foreach (var commit in commits)
+                {
+                    Console.WriteLine($"Commit SHA: {commit.Sha}");
+                    Console.WriteLine($"Commit Message: {commit.commit.Message}");
+                    Console.WriteLine($"Commit Author: {commit.commit.Author.Name}");
+                    Console.WriteLine($"Commit Date: {commit.commit.Author.Date}");
+                    // Add more properties or custom processing as needed
+                    Console.WriteLine();
+                }
+            }
+            else
+            {
+                Console.WriteLine($"Failed to get commits. Status code: {response.StatusCode}");
+            }
+        }
+
+
+        class Commit
+        {
+            // Define the properties of a commit object based on the actual JSON structure
+            // returned by the GitHub API
+            public string Sha { get; set; }
+            public CommitDetail commit { get; set; }
+            // Add more properties as needed
+        }
+
+        class CommitDetail
+        {
+            public string Message { get; set; }
+            public Committer Author { get; set; }
+            // Add more properties as needed
+        }
+
+        class Committer
+        {
+            public string Name { get; set; }
+            public DateTimeOffset Date { get; set; }
+            // Add more properties as needed
         }
     }
 }
