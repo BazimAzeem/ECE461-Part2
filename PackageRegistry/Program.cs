@@ -52,12 +52,17 @@ namespace PackageRegistry
 			Console.WriteLine(LOG_LEVEL);
 
 			LogDebug("hello");
-			// var testMetricCalc = new MetricsCalculation.MetricsCalculator("https://github.com/nodejs/node");
-			var testMetricCalc = new MetricsCalculation.MetricsCalculator("https://github.com/BazimAzeem/ECE461-Part2");
+			var npmMetricTest = new MetricsCalculation.MetricsCalculator("https://github.com/nodejs/node");
 			
+			var testMetricCalc = new MetricsCalculation.MetricsCalculator("https://github.com/BazimAzeem/ECE461-Part2");
+			var testnpmCalc = new MetricsCalculation.MetricsCalculator("https://www.npmjs.com/package/js-yaml");
+			
+			npmMetricTest.Calculate();
 			testMetricCalc.Calculate();
-
+			testnpmCalc.Calculate();
+			LogInfo(npmMetricTest.ToString());
 			LogInfo(testMetricCalc.ToString());
+			LogInfo(testnpmCalc.ToString());
             
         }
 

@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Net.Http;
+using System.Net.Http.Headers;
 
 namespace PackageRegistry.MetricsCalculation
 {
@@ -17,6 +19,9 @@ namespace PackageRegistry.MetricsCalculation
 		public List<Task> calcMetricTaskQueue = new List<Task>();
 
         public MetricsCalculator(string url) {
+
+			url = url.Contains("npmjs") ? GetUrlFromNpmUrl(url) : url;
+			this.url = url;
 
             // get the user name and repository name
 			string[] phrases = url.Split("/");
@@ -105,6 +110,51 @@ namespace PackageRegistry.MetricsCalculation
 			this.score = runningSum / divisor;
 
 			return this.score;
+		}
+
+
+		private async static Task<string> scrapeForGitUrl(string url)
+		{
+
+			// get package name from url
+			string[] phrases = url.Split("/");
+			string packageName = phrases[phrases.Length - 1];
+
+			using var client = new HttpClient();
+
+			var result = await client.GetStringAsync("https://registry.npmjs.org/" + packageName);
+
+			// HACK this may be the least robust possible way of doing this 
+			string[] tokens = result.Split("\"");
+			foreach (string s in tokens)
+			{
+				if (s.Contains("github.com"))
+				{
+					return s;
+				}
+			}
+
+			return "no_url_found";
+
+		}
+
+		public static string GetUrlFromNpmUrl(string url)
+		{
+
+			Task<string> urlScrape = scrapeForGitUrl(url);
+
+			try
+			{
+				urlScrape.Wait(TimeSpan.FromSeconds(Program.REQUEST_TIMEOUT_TIME));
+			}
+			catch (AggregateException)
+			{ // probably a 404 error
+				Program.LogError("Invalid library url: " + url);
+				return null;
+			}
+			string gitUrl = urlScrape.Result;
+
+			return gitUrl;
 		}
 
 

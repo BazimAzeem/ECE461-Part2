@@ -436,8 +436,8 @@ namespace PackageRegistry.MetricsCalculation
 
     public class PRRatio : Metric
     {
-        static HttpClient httpClient = new HttpClient();
-
+        HttpClient httpClient = new HttpClient();
+        readonly int PER_PAGE = 1000;
         public PRRatio(MetricsCalculator parentLibrary) : base(parentLibrary)
         {
             this.weight = 1;
@@ -453,14 +453,12 @@ namespace PackageRegistry.MetricsCalculation
         {
 
             
-            Console.WriteLine("pr request metric");
-            string access_token = Environment.GetEnvironmentVariable("GITHUB_TOKEN");
-
             
-
+            string access_token = Environment.GetEnvironmentVariable("GITHUB_TOKEN");
             string owner = this.parentLibrary.owner;
             string repo = this.parentLibrary.name;
-            string state = "all"; // "open" or "closed" or "all"
+
+
 
             // Set up the HTTP client
             httpClient.BaseAddress = new Uri("https://api.github.com/");
@@ -470,46 +468,38 @@ namespace PackageRegistry.MetricsCalculation
 
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Token", access_token);
 
-            // Call the API to list pull requests
-            HttpResponseMessage response = await httpClient.GetAsync($"repos/{owner}/{repo}/pulls?state={state}");
-
-            if (response.IsSuccessStatusCode)
-            {
-                string responseContent = await response.Content.ReadAsStringAsync();
-                // Deserialize the responseContent to your desired model
-                // e.g., using Newtonsoft.Json.JsonConvert.DeserializeObject<T>(responseContent)
-                // Console.WriteLine(responseContent);
-                Console.WriteLine("json received. TODO paRSE");
-                // TODO parse json
-            }
-            else
-            {
-                Program.LogError($"Failed to list pull requests. Status code: {response.StatusCode}");
-            }
+            
 
             // get number of commits
-            response = await httpClient.GetAsync($"repos/{owner}/{repo}/commits");
+            HttpResponseMessage response = await httpClient.GetAsync($"repos/{owner}/{repo}/commits?per_page={PER_PAGE}");
 
             if (response.IsSuccessStatusCode)
             {
                 string responseContent = await response.Content.ReadAsStringAsync();
                 // Deserialize the response content to an array of commit objects
                 var commits = Newtonsoft.Json.JsonConvert.DeserializeObject<Commit[]>(responseContent);
-                Console.WriteLine($"Total commits in the repository: {commits.Length}");
+                Program.LogDebug($"Total commits retreived in the repository {owner}/{repo}: {commits.Length}");
 
+                int num_commits = commits.Length;
+                int num_pr_commits = 0;
                 foreach (var commit in commits)
                 {
-                    Console.WriteLine($"Commit SHA: {commit.Sha}");
-                    Console.WriteLine($"Commit Message: {commit.commit.Message}");
-                    Console.WriteLine($"Commit Author: {commit.commit.Author.Name}");
-                    Console.WriteLine($"Commit Date: {commit.commit.Author.Date}");
-                    // Add more properties or custom processing as needed
-                    Console.WriteLine();
+                    // Console.WriteLine($"Commit SHA: {commit.Sha}");
+                    // Console.WriteLine($"Commit Message: {commit.commit.Message}");
+                    if (commit.commit.Message.Contains("PR-URL") || commit.commit.Message.Contains("pull request") ) {
+                        // Program.LogDebug("PULL REQUEST REVEIWED");
+                        num_pr_commits++;
+                    }
+                    // Console.WriteLine($"Commit Author: {commit.commit.Author.Name}");
+                    // Console.WriteLine($"Commit Date: {commit.commit.Author.Date}");
+           
                 }
+
+                this.score = ((float) num_pr_commits) / num_commits;
             }
             else
             {
-                Console.WriteLine($"Failed to get commits. Status code: {response.StatusCode}");
+                Program.LogError($"Failed to get commits. Status code: {response.StatusCode}");
             }
         }
 
