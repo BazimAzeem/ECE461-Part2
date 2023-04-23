@@ -11,7 +11,7 @@ namespace PackageRegistry
         public string name;
         public Version oldBound; // the oldest version we may use
         public Version latestBound; // the newest version we may use
-        public Repository selectedRepo; // the version we currently have selected
+        public Package selectedPackage; // the version we currently have selected
 
         public bool versionSelected = false, traversed = false;
 
@@ -20,7 +20,7 @@ namespace PackageRegistry
             this.name = name; this.oldBound = oldBound; this.latestBound = latestBound;
         }
 
-        public Repository SelectVersion()
+        public Package SelectVersion()
         {
             return null;
         }

@@ -1,6 +1,11 @@
 FROM ubuntu:jammy AS base
 
-RUN apt-get update
+RUN apt-get update && apt-get install -y --no-install-recommends \ 
+    python-pip=20.3.4+dfsg-4 \
+    dotnet-sdk-6.0=6.0.113-0ubuntu1~22.04.1 \
+    dotnet-runtime-6.0=6.0.113-0ubuntu1~22.04.1 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /home/
 RUN mkdir project2
@@ -9,5 +14,4 @@ WORKDIR /home/project2
 COPY . .
 RUN ls
 
-RUN ./ECE461-Project-Part1-Handoff-CLI/run install && ./ECE461-Project-Part1-Handoff-CLI/run build
 RUN ./run install && ./run build

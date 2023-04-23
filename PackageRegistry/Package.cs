@@ -5,47 +5,55 @@ using System.Threading.Tasks;
 
 namespace PackageRegistry
 {
-    public struct Version {
+    public struct Version
+    {
         int major, minor, patch;
-        public Version(int major, int minor, int patch) {
+        public Version(int major, int minor, int patch)
+        {
             this.major = major; this.minor = minor; this.patch = patch;
         }
     }
-    
-   public class Repository {
+
+    public class Package
+    {
         List<DependancySpec> Dependancies;
 
-        public Repository() {
+        public Package()
+        {
             RetrieveDependancies();
         }
 
-        void RetrieveDependancies() {
+        void RetrieveDependancies()
+        {
             Dependancies = new List<DependancySpec>();
-            
+
             // TODO somehow build Dependancies
 
         }
-        
 
-   }
-    
-    public class FileRepository : Repository {
+
+    }
+
+    public class FilePackage : Package
+    {
         string filepath;
 
-        public FileRepository(string filepath) {
+        public FilePackage(string filepath)
+        {
             this.filepath = filepath;
         }
 
     }
 
-    public class NPMRepository : Repository
+    public class NPMPackage : Package
     {
         string url;
         CLI_Translator metrics_calculator;
 
-        
 
-        public NPMRepository(string url) {
+
+        public NPMPackage(string url)
+        {
             this.url = url;
             metrics_calculator = new CLI_Translator(url, this);
 
@@ -53,6 +61,6 @@ namespace PackageRegistry
 
         }
 
-        
+
     }
 }
