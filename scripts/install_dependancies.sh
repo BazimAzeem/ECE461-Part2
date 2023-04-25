@@ -1,3 +1,4 @@
+#!/bin/bash
 # echo "installing hacking software..."
 sleep 1
 # installation procedure

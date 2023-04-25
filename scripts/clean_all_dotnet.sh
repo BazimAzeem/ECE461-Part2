@@ -1,3 +1,5 @@
+#!/bin/bash
+
 sudo apt remove dotnet*
 sudo apt remove aspnetcore*
 sudo apt remove netstandard*

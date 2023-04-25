@@ -17,7 +17,6 @@ elif [[ ${ubuntu_release} == *22.04* ]]; then
     sudo apt remove -y dotnet-sdk-6.0
     sudo apt-get remove -y dotnet-runtime-6.0
 else
-then
     echo "ERROR: UNSUPPORTED DISTRIBUTION OF LINUX"
     echo "Supported versions are Ubuntu 20.04 LTS and Ubuntu 22.04 LTS"
     sleep 5

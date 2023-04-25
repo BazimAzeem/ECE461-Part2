@@ -21,7 +21,7 @@ namespace PackageRegistry
 
         public void CalculateMetrics()
         {
-           
+
             metricsCalculator.Calculate();
         }
     }

@@ -54,9 +54,9 @@ namespace PackageRegistry.MetricsCalculation
         }
 
         private float sigmoid(float x)
-		{
-            return 1 / (1 + (float) Math.Exp(-x));
-		}
+        {
+            return 1 / (1 + (float)Math.Exp(-x));
+        }
 
         public override async Task Calculate()
         {
@@ -97,10 +97,10 @@ namespace PackageRegistry.MetricsCalculation
                 else
                 {
                     float ratio = (float)readme.Length / 10000;// / (float)Math.Pow(codeSize,2.0/3.0);
-           
-                   
+
+
                     // this.score = Math.Min(1500 * readme.Length / codeSize, 1);
-                    this.score = 2*(sigmoid(ratio)-0.5F);
+                    this.score = 2 * (sigmoid(ratio) - 0.5F);
                 }
 
 
@@ -332,11 +332,11 @@ namespace PackageRegistry.MetricsCalculation
     }
     public class LicenseMetric : Metric
     {
-        
-        /// The list of compatible licenses with this project
-        string[] compatibleLicenses = {"mit", "lgpl 2.1", "lgpl 2.1+","bsd", "bsd-new", "x11", "public domain"};
 
-        string[] incompatibleLicenses = {"gplv2", "gplv2+", "gplv3", "gplv3+", "affero gplv3", "apache2.0", "mpl", "mpl 1.1"};
+        /// The list of compatible licenses with this project
+        string[] compatibleLicenses = { "mit", "lgpl 2.1", "lgpl 2.1+", "bsd", "bsd-new", "x11", "public domain" };
+
+        string[] incompatibleLicenses = { "gplv2", "gplv2+", "gplv3", "gplv3+", "affero gplv3", "apache2.0", "mpl", "mpl 1.1" };
 
         public LicenseMetric(MetricsCalculator parentLibrary) : base(parentLibrary)
         {
@@ -358,15 +358,15 @@ namespace PackageRegistry.MetricsCalculation
                     Program.LogError("access token not set. Ensure the env variable GITHUB_TOKEN is set");
                     return;
                 }
-               
+
                 var client = new GitHubClient(new Octokit.ProductHeaderValue("ECE461_CLI"));
                 var tokenAuth = new Octokit.Credentials(access_token);
                 client.Credentials = tokenAuth;
 
                 var repo = await client.Repository.Get(this.parentLibrary.owner, this.parentLibrary.name);
 
-             
-            
+
+
                 string readme = await client.Repository.Content.GetReadmeHtml(repo.Id);
                 //string readme = (await client.Repository.Content.GetReadme(repo.Id)).Content;
 
@@ -377,48 +377,52 @@ namespace PackageRegistry.MetricsCalculation
                 List<string> licenseLines = new List<string>();
 
                 // search for all lines that mention a license
-                foreach (string line in readmeLines) {
+                foreach (string line in readmeLines)
+                {
                     if (line.ToLower().Contains("license")) licenseLines.Add(line.ToLower());
                 }
 
-                if (licenseLines.Count > 0) {
+                if (licenseLines.Count > 0)
+                {
                     // we have found lines mentioning a license, now we need to see whether it is compatible or not
                     score = 0.5F;
-                    
+
                     // search through all lines that could contain the license
                     foreach (string line in licenseLines)
-					{
+                    {
                         // Program.LogDebug("Searching line " + line + "for licenses");
                         // if we found a compatible license, increase the score
                         foreach (string license in compatibleLicenses)
-						{
+                        {
                             if (line.Contains(license))
-							{
+                            {
                                 Program.LogDebug("found compatible license: " + license);
                                 score += 0.5F;
-							}
-						}
+                            }
+                        }
 
                         // if we found an incompatible license, decrease the score
-                        foreach(string license in incompatibleLicenses)
-						{
+                        foreach (string license in incompatibleLicenses)
+                        {
                             if (line.Contains(license))
-							{
+                            {
                                 Program.LogDebug("found incompatible license: " + license);
                                 score -= 0.5F;
-							}
-						}
-					}
+                            }
+                        }
+                    }
 
 
                     // make sure score is within acceptable range
                     score = Math.Max(score, 0);
                     score = Math.Min(score, 1);
 
-                }else{
+                }
+                else
+                {
                     // if there is no license at all, set the score to zero
                     this.score = 0;
-                }    
+                }
 
 
 
@@ -445,15 +449,15 @@ namespace PackageRegistry.MetricsCalculation
         }
 
         private float sigmoid(float x)
-		{
-            return 1 / (1 + (float) Math.Exp(-x));
-		}
+        {
+            return 1 / (1 + (float)Math.Exp(-x));
+        }
 
         public override async Task Calculate()
         {
 
-            
-            
+
+
             string access_token = Environment.GetEnvironmentVariable("GITHUB_TOKEN");
             string owner = this.parentLibrary.owner;
             string repo = this.parentLibrary.name;
@@ -468,7 +472,7 @@ namespace PackageRegistry.MetricsCalculation
 
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Token", access_token);
 
-            
+
 
             // get number of commits
             HttpResponseMessage response = await httpClient.GetAsync($"repos/{owner}/{repo}/commits?per_page={PER_PAGE}");
@@ -486,16 +490,17 @@ namespace PackageRegistry.MetricsCalculation
                 {
                     // Console.WriteLine($"Commit SHA: {commit.Sha}");
                     // Console.WriteLine($"Commit Message: {commit.commit.Message}");
-                    if (commit.commit.Message.Contains("PR-URL") || commit.commit.Message.Contains("pull request") ) {
+                    if (commit.commit.Message.Contains("PR-URL") || commit.commit.Message.Contains("pull request"))
+                    {
                         // Program.LogDebug("PULL REQUEST REVEIWED");
                         num_pr_commits++;
                     }
                     // Console.WriteLine($"Commit Author: {commit.commit.Author.Name}");
                     // Console.WriteLine($"Commit Date: {commit.commit.Author.Date}");
-           
+
                 }
 
-                this.score = ((float) num_pr_commits) / num_commits;
+                this.score = ((float)num_pr_commits) / num_commits;
             }
             else
             {
