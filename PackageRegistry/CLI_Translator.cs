@@ -9,16 +9,20 @@ namespace PackageRegistry
     {
         string packageUrl;
         Package parentPackage;
+        MetricsCalculation.MetricsCalculator metricsCalculator;
 
         public CLI_Translator(string url, Package parent)
         {
             this.packageUrl = url;
             this.parentPackage = parent;
+
+            metricsCalculator = new MetricsCalculation.MetricsCalculator(url);
         }
 
         public void CalculateMetrics()
         {
-            // TODO call bad CLI For the url and metrics of the other project
+           
+            metricsCalculator.Calculate();
         }
     }
 }
