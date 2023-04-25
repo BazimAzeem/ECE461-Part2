@@ -1,11 +1,17 @@
 steps:
 - name: 'gcr.io/cloud-builders/git'
   args: ['submodule', 'update', '--init', '--recursive']
-- name: 'gcr.io/cloud-builders/docker'
+- name: 'gcr.io/cloud-builders/docker build'
   args: [ 
     'build', 
-    '-t', 'us.gcr.io/$PROJECT_ID/ece461_project2:latest', 
-    '--cache-from', 'gcr.io/$PROJECT_ID/ece461_project2:latest',
+    '-t', 'us.gcr.io/$PROJECT_ID/package-registry:latest', 
+    '--cache-from', 'gcr.io/$PROJECT_ID/package-registry:latest',
     '.' 
   ]
-images: [us.gcr.io/$PROJECT_ID/ece461_project2:latest]
+- name: 'gcr.io/cloud-builders/docker run'
+  args: [ 
+    'run', 
+    '-p', '$PORT:80', 
+    'gcr.io/$PROJECT_ID/package-registry:latest',
+  ]
+images: [us.gcr.io/$PROJECT_ID/package-registry:latest]
