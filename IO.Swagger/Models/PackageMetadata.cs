@@ -18,7 +18,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
 
-namespace PakageRegistry.Models
+namespace PackageRegistry.Models
 {
     /// <summary>
     /// The \&quot;Name\&quot; and \&quot;Version\&quot; are used as a unique identifier pair when uploading a package.  The \&quot;ID\&quot; is used as an internal identifier for interacting with existing packages.

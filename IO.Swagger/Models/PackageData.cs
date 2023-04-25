@@ -18,7 +18,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
 
-namespace PakageRegistry.Models
+namespace PackageRegistry.Models
 {
     /// <summary>
     /// This is a \&quot;union\&quot; type. - On package upload, either Content or URL should be set. - On package update, exactly one field should be set. - On download, the Content field should be set.

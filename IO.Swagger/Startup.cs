@@ -21,10 +21,10 @@ using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using Swashbuckle.AspNetCore.Swagger;
 using Swashbuckle.AspNetCore.SwaggerGen;
-using PakageRegistry.Filters;
-using PakageRegistry.Security;
+using PackageRegistry.Filters;
+using PackageRegistry.Security;
 
-namespace PakageRegistry
+namespace PackageRegistry
 {
     /// <summary>
     /// Startup

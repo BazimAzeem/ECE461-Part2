@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace PakageRegistry.Security
+namespace PackageRegistry.Security
 {
     /// <summary>
     /// class to handle api_key security.

@@ -14,12 +14,12 @@ using Swashbuckle.AspNetCore.Annotations;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations;
-using PakageRegistry.Attributes;
-using PakageRegistry.Security;
+using PackageRegistry.Attributes;
+using PackageRegistry.Security;
 using Microsoft.AspNetCore.Authorization;
-using PakageRegistry.Models;
+using PackageRegistry.Models;
 
-namespace PakageRegistry.Controllers
+namespace PackageRegistry.Controllers
 {
     /// <summary>
     /// 

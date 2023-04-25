@@ -18,7 +18,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
 
-namespace PakageRegistry.Models
+namespace PackageRegistry.Models
 {
     /// <summary>
     /// Package rating (cf. Project 1).  If the Project 1 that you inherited does not support one or more of the original properties, denote this with the value \&quot;-1\&quot;.
