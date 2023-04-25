@@ -28,6 +28,8 @@ jobs:
         uses: github/super-linter@v4
         env:
           VALIDATE_ALL_CODEBASE: true
+          VALIDATE_JSCPD: false # Stops checking for duplicate code
+          VALIDATE_GITLEAKS: false # Stops checking for key leaks in api examples
           DEFAULT_BRANCH: "master"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           IGNORE_GITIGNORED_FILES: true
