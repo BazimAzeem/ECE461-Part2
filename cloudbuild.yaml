@@ -11,7 +11,7 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   args: [ 
     'run', 
-    '-p', '$PORT:80', 
+    '-p', '8080:80', 
     'gcr.io/$PROJECT_ID/package-registry:latest',
   ]
 images: [us.gcr.io/$PROJECT_ID/package-registry:latest]
