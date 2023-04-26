@@ -9,7 +9,7 @@ namespace PackageRegistry
         private NpgsqlConnectionStringBuilder connectionString;
         private NpgsqlDataSource dataSource;
 
-        public PostgreSQLClient() 
+        public PostgreSQLClient()
         {
             this.connectionString = getPostgreSqlUnixSocketConnectionString();
             this.dataSource = NpgsqlDataSource.Create(this.connectionString);
@@ -40,7 +40,7 @@ namespace PackageRegistry
         }
 
         // Select all from package table
-        public async Task SelectFromPackage() 
+        public async Task SelectFromPackage()
         {
             await using var command = this.dataSource.CreateCommand("SELECT * FROM package");
             await using var reader = await command.ExecuteReaderAsync();
@@ -54,7 +54,7 @@ namespace PackageRegistry
 
         // Select package with given id
         // TODO
-        public async Task SelectFromPackage(int id) 
+        public async Task SelectFromPackage(int id)
         {
             await using var command = this.dataSource.CreateCommand("SELECT * FROM package");
             await using var reader = await command.ExecuteReaderAsync();
@@ -63,21 +63,22 @@ namespace PackageRegistry
             {
                 object[] row = new object[reader.FieldCount];
                 Console.WriteLine(reader.GetValues(row));
-                for (int i = 0; i < reader.FieldCount; i++) {
+                for (int i = 0; i < reader.FieldCount; i++)
+                {
                     Console.WriteLine(row[i]);
                 }
             }
         }
 
         // Delete all from package table
-        public async Task DeleteFromPackage() 
+        public async Task DeleteFromPackage()
         {
             await using var command = this.dataSource.CreateCommand("DELETE FROM package");
             await command.ExecuteNonQueryAsync();
         }
 
         // Delete package with given id
-        public async Task DeleteFromPackage(int id) 
+        public async Task DeleteFromPackage(int id)
         {
             var connection = await this.dataSource.OpenConnectionAsync();
             await using var command = new NpgsqlCommand("DELETE FROM package WHERE id=($1)", connection)
@@ -92,7 +93,7 @@ namespace PackageRegistry
         }
 
         // TODO
-        public async Task InsertIntoPackage() 
+        public async Task InsertIntoPackage()
         {
             await using var command = this.dataSource.CreateCommand("INSERT INTO package () VALUES");
             await command.ExecuteNonQueryAsync();
