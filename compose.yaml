@@ -10,3 +10,9 @@ services:
     image: ece461_project2:latest
 
     command: bash -c "./run" 
+
+    volumes:
+      - ./PackageRegistry:/home/project2/PackageRegistry
+    # env_file:
+    #   - .env
+      
