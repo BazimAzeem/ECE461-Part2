@@ -5,13 +5,13 @@ steps:
   args: [ 
     'build', 
     '-t', 'us.gcr.io/$PROJECT_ID/package-registry:latest', 
-    '--cache-from', 'gcr.io/$PROJECT_ID/package-registry:latest',
+    '--cache-from', 'us.gcr.io/$PROJECT_ID/package-registry:latest',
     '.' 
   ]
 - name: 'gcr.io/cloud-builders/docker'
   args: [ 
     'run', 
     '-p', '8080:80', 
-    'gcr.io/$PROJECT_ID/package-registry:latest',
+    'us.gcr.io/$PROJECT_ID/package-registry:latest',
   ]
 images: [us.gcr.io/$PROJECT_ID/package-registry:latest]
