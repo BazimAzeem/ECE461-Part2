@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using Npgsql;
 
 namespace PackageRegistry
@@ -97,6 +98,21 @@ namespace PackageRegistry
         {
             await using var command = this.dataSource.CreateCommand("INSERT INTO package () VALUES");
             await command.ExecuteNonQueryAsync();
+        }
+    }
+
+    public class PostgreSQLTable
+    {
+        private NpgsqlDataSource dataSource;
+        String name;
+        Dictionary<String, String> schema;
+        List<String> constraints;
+        public PostgreSQLTable(NpgsqlDataSource dataSource, String name, Dictionary<String, String> schema, List<String> constraints)
+        {
+            this.dataSource = dataSource;
+            this.name = name;
+            this.schema = schema;
+            this.constraints = constraints;
         }
     }
 }
