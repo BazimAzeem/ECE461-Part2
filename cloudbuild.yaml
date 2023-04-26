@@ -8,10 +8,4 @@ steps:
     '--cache-from', 'us.gcr.io/$PROJECT_ID/package-registry:latest',
     '.' 
   ]
-# - name: 'gcr.io/cloud-builders/docker'
-#   args: [ 
-#     'run', 
-#     '-p', '8080:80', 
-#     'us.gcr.io/$PROJECT_ID/package-registry:latest',
-#   ]
 images: [us.gcr.io/$PROJECT_ID/package-registry:latest]
