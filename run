@@ -1,5 +1,9 @@
 #!/bin/bash
 
+if [ ! -f ".env" ]; then
+    touch .env
+fi
+
 if [[ $1 == "help" ]]
 then
     echo "possible commands: help install uninstall build clean test run"
@@ -17,7 +21,7 @@ then
     
 elif [[ $1 == "clean" ]]
 then
-    cd ECE461-Project-Part1-Handoff-CLI && ./run clean && cd ..
+    # cd ECE461-Project-Part1-Handoff-CLI && ./run clean && cd ..
     cd PackageRegistry && dotnet clean && cd ..
 elif [[ $1 == "test" ]]
 then
