@@ -11,6 +11,7 @@
     <IsTransformWebConfigDisabled>true</IsTransformWebConfigDisabled>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Npgsql" Version="7.0.2" />
     <PackageReference Include="Octokit" Version="5.0.0" />
     <PackageReference Include="Octokit.GraphQL" Version="0.2.0-beta" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="5.5.1"/>
