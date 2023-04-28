@@ -16,10 +16,13 @@ namespace PackageRegistry.Security
     public class ApiKeyAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
     {
         /// <summary>
-        /// scheme name for authentication handler.
+        /// 
         /// </summary>
         public const string SchemeName = "ApiKey";
 
+        /// <summary>
+        /// 
+        /// </summary>
         public ApiKeyAuthenticationHandler(IOptionsMonitor<AuthenticationSchemeOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock) : base(options, logger, encoder, clock)
         {
         }

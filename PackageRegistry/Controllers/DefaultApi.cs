@@ -53,14 +53,14 @@ namespace PackageRegistry.Controllers
             // return StatusCode(401);
 
             //TODO: Uncomment the next line to return response 501 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(501);
-            string exampleJson = null;
-            exampleJson = "\"\"";
+            return StatusCode(501);
+            // string exampleJson = null;
+            // exampleJson = "\"\"";
 
-            var example = exampleJson != null
-            ? JsonConvert.DeserializeObject<string>(exampleJson)
-            : default(string);            //TODO: Change the data returned
-            return new ObjectResult(example);
+            // var example = exampleJson != null
+            // ? JsonConvert.DeserializeObject<string>(exampleJson)
+            // : default(string);            //TODO: Change the data returned
+            // return new ObjectResult(example);
         }
 
         /// <summary>
