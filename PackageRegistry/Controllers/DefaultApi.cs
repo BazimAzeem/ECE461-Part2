@@ -43,8 +43,12 @@ namespace PackageRegistry.Controllers
         [SwaggerResponse(statusCode: 200, type: typeof(string), description: "Return an AuthenticationToken.")]
         public virtual IActionResult CreateAuthToken([FromBody] AuthenticationRequest body)
         {
+            Console.WriteLine("Received PUT /authenticate");
+            Console.WriteLine(body.ToString());
+
+            ActionResult response;
             //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(200, default(string));
+            // response = StatusCode(200, default(string));
 
             //TODO: Uncomment the next line to return response 400 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
             // return StatusCode(400);
@@ -53,7 +57,10 @@ namespace PackageRegistry.Controllers
             // return StatusCode(401);
 
             //TODO: Uncomment the next line to return response 501 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            return StatusCode(501);
+            response = StatusCode(501);
+            Console.WriteLine(response);
+
+            return response;
             // string exampleJson = null;
             // exampleJson = "\"\"";
 
@@ -77,6 +84,11 @@ namespace PackageRegistry.Controllers
         [SwaggerOperation("PackageByNameDelete")]
         public virtual IActionResult PackageByNameDelete([FromHeader][Required()] string xAuthorization, [FromRoute][Required] string name)
         {
+            Console.WriteLine("Received DELETE /package/byName/{name}");
+            Console.WriteLine(name.ToString());
+
+            ActionResult response;
+
             //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
             // return StatusCode(200);
 
@@ -107,6 +119,11 @@ namespace PackageRegistry.Controllers
         [SwaggerResponse(statusCode: 0, type: typeof(Error), description: "unexpected error")]
         public virtual IActionResult PackageByNameGet([FromRoute][Required] string name, [FromHeader][Required()] string xAuthorization)
         {
+            Console.WriteLine("Received GET /package/byName/{name}");
+            Console.WriteLine(name.ToString());
+
+            ActionResult response;
+
             //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
             // return StatusCode(200, default(List<PackageHistoryEntry>));
 
@@ -144,6 +161,12 @@ namespace PackageRegistry.Controllers
         [SwaggerResponse(statusCode: 200, type: typeof(List<PackageMetadata>), description: "Return a list of packages.")]
         public virtual IActionResult PackageByRegExGet([FromBody] string body, [FromHeader][Required()] string xAuthorization, [FromRoute][Required] string regex)
         {
+            Console.WriteLine("Received POST /package/byRegEx/{regex}");
+            Console.WriteLine(body.ToString());
+            Console.WriteLine(regex.ToString());
+
+            ActionResult response;
+
             //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
             // return StatusCode(200, default(List<PackageMetadata>));
 
@@ -177,6 +200,11 @@ namespace PackageRegistry.Controllers
         [SwaggerResponse(statusCode: 201, type: typeof(Package), description: "Success. Check the ID in the returned metadata for the official ID.")]
         public virtual IActionResult PackageCreate([FromBody] PackageData body, [FromHeader][Required()] string xAuthorization)
         {
+            Console.WriteLine("Received POST /package");
+            Console.WriteLine(body.ToString());
+
+            ActionResult response;
+
             //TODO: Uncomment the next line to return response 201 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
             // return StatusCode(201, default(Package));
 
@@ -211,6 +239,11 @@ namespace PackageRegistry.Controllers
         [SwaggerOperation("PackageDelete")]
         public virtual IActionResult PackageDelete([FromHeader][Required()] string xAuthorization, [FromRoute][Required] string id)
         {
+            Console.WriteLine("Received DELETE /package/{id}");
+            Console.WriteLine(id.ToString());
+
+            ActionResult response;
+
             //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
             // return StatusCode(200);
 
@@ -239,6 +272,11 @@ namespace PackageRegistry.Controllers
         [SwaggerResponse(statusCode: 200, type: typeof(PackageRating), description: "Return the rating. Only use this if each metric was computed successfully.")]
         public virtual IActionResult PackageRate([FromRoute][Required] string id, [FromHeader][Required()] string xAuthorization)
         {
+            Console.WriteLine("Received GET /package/{id}/rate");
+            Console.WriteLine(id.ToString());
+
+            ActionResult response;
+
             //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
             // return StatusCode(200, default(PackageRating));
 
@@ -277,6 +315,11 @@ namespace PackageRegistry.Controllers
         [SwaggerResponse(statusCode: 0, type: typeof(Error), description: "unexpected error")]
         public virtual IActionResult PackageRetrieve([FromHeader][Required()] string xAuthorization, [FromRoute][Required] string id)
         {
+            Console.WriteLine("Received GET /package/{id}");
+            Console.WriteLine(id.ToString());
+
+            ActionResult response;
+
             //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
             // return StatusCode(200, default(Package));
 
@@ -313,6 +356,12 @@ namespace PackageRegistry.Controllers
         [SwaggerOperation("PackageUpdate")]
         public virtual IActionResult PackageUpdate([FromBody] Package body, [FromHeader][Required()] string xAuthorization, [FromRoute][Required] string id)
         {
+            Console.WriteLine("Received PUT /package/{id}");
+            Console.WriteLine(body.ToString());
+            Console.WriteLine(id.ToString());
+
+            ActionResult response;
+
             //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
             // return StatusCode(200);
 
@@ -344,6 +393,12 @@ namespace PackageRegistry.Controllers
         [SwaggerResponse(statusCode: 0, type: typeof(Error), description: "unexpected error")]
         public virtual IActionResult PackagesList([FromBody] List<PackageQuery> body, [FromHeader][Required()] string xAuthorization, [FromQuery] string offset)
         {
+            Console.WriteLine("Received POST /packages");
+            Console.WriteLine(body.ToString());
+            Console.WriteLine(offset.ToString());
+
+            ActionResult response;
+
             //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
             // return StatusCode(200, default(List<PackageMetadata>));
 
@@ -378,6 +433,10 @@ namespace PackageRegistry.Controllers
         [SwaggerOperation("RegistryReset")]
         public virtual IActionResult RegistryReset([FromHeader][Required()] string xAuthorization)
         {
+            Console.WriteLine("Received DELETE /reset");
+
+            ActionResult response;
+
             //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
             // return StatusCode(200);
 

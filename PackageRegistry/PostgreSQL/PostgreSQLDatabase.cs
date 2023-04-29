@@ -6,7 +6,7 @@ namespace PackageRegistry
     public class PostgreSQLDatabase
     {
         private NpgsqlConnectionStringBuilder connectionString;
-        NpgsqlDataSource dataSource;
+        public NpgsqlDataSource dataSource;
 
         public PostgreSQLDatabase(string host, string dbUser, string dbPasswd, string dbName)
         {

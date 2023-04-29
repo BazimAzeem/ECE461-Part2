@@ -1,11 +1,12 @@
 using System;
+using System.Collections.Generic;
 using Npgsql;
 
 namespace PackageRegistry
 {
     public class PackageRegistryDB : PostgreSQLDatabase
     {
-
+        public PostgreSQLTable packageTable;
         public PackageRegistryDB() :
         base(
             Environment.GetEnvironmentVariable("INSTANCE_UNIX_SOCKET"),
@@ -14,7 +15,38 @@ namespace PackageRegistry
             Environment.GetEnvironmentVariable("DB_NAME")
         )
         {
-
+            this.packageTable = new PostgreSQLTable(
+                this.dataSource,
+                "package",
+                new Dictionary<string, string> {
+                    {"id", "SERIAL PRIMARY KEY"},
+                    {"name", "VARCHAR(214)"},
+                    {"version_major", "INT"},
+                    {"version_minor", "INT"},
+                    {"version_patch", "INT"},
+                    {"content", "TEXT"},
+                    {"url", "TEXT"},
+                    {"js_program", "TEXT"},
+                    {"ramp_up_score", "FLOAT DEFAULT -1"},
+                    {"correctness_score", "FLOAT DEFAULT -1"},
+                    {"bus_factor_score", "FLOAT DEFAULT -1"},
+                    {"responsive_maintainer_score", "FLOAT DEFAULT -1"},
+                    {"license_score FLOAT", "DEFAULT -1"},
+                    {"good_pinning_score", "FLOAT DEFAULT -1"},
+                    {"pull_request_score", "FLOAT DEFAULT -1"},
+                    {"net_score", "FLOAT DEFAULT -1"}
+                },
+                new List<string> {
+                    "CHECK((ramp_up_score >= 0 AND ramp_up_score <= 1) OR ramp_up_score = -1)",
+                    "CHECK((correctness_score >= 0 AND correctness_score <= 1) OR correctness_score = -1)",
+                    "CHECK((bus_factor_score >= 0 AND bus_factor_score <= 1) OR bus_factor_score = -1)",
+                    "CHECK((responsive_maintainer_score >= 0 AND responsive_maintainer_score <= 1) OR responsive_maintainer_score = -1)",
+                    "CHECK((license_score >= 0 AND license_score <= 1) OR license_score = -1)",
+                    "CHECK((good_pinning_score >= 0 AND good_pinning_score <= 1) OR good_pinning_score = -1)",
+                    "CHECK((pull_request_score >= 0 AND pull_request_score <= 1) OR pull_request_score = -1)",
+                    "CHECK((net_score >= 0 AND net_score <= 1) OR net_score = -1)"
+                }
+            );
         }
         // Select all from package table
         // public async Task SelectFromPackage()
