@@ -43,7 +43,7 @@ namespace PackageRegistry.Controllers
         [SwaggerResponse(statusCode: 200, type: typeof(string), description: "Return an AuthenticationToken.")]
         public virtual IActionResult CreateAuthToken([FromBody] AuthenticationRequest body)
         {
-            Program.WriteLogEntry("PUT-.authenticate", body.ToString());
+            Program.WriteLogEntry("PUT-.authenticate", "PUT /authenticate\n" + body.ToString());
 
             ActionResult response;
             //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..),-...
@@ -83,7 +83,7 @@ namespace PackageRegistry.Controllers
         [SwaggerOperation("PackageByNameDelete")]
         public virtual IActionResult PackageByNameDelete([FromHeader][Required()] string xAuthorization, [FromRoute][Required] string name)
         {
-            Program.WriteLogEntry("DELETE-.package.byName.{name}", name.ToString());
+            Program.WriteLogEntry("DELETE-.package.byName.{name}", "DELETE /package/byName/{name}\n" + "name: " + name.ToString());
 
             ActionResult response;
 
@@ -117,7 +117,7 @@ namespace PackageRegistry.Controllers
         [SwaggerResponse(statusCode: 0, type: typeof(Error), description: "unexpected error")]
         public virtual IActionResult PackageByNameGet([FromRoute][Required] string name, [FromHeader][Required()] string xAuthorization)
         {
-            Program.WriteLogEntry("GET-.package.byName.{name}", name.ToString());
+            Program.WriteLogEntry("GET-.package.byName.{name}", "GET /package/byName/{name}\n" + "name: " + name.ToString());
 
             ActionResult response;
 
@@ -158,7 +158,7 @@ namespace PackageRegistry.Controllers
         [SwaggerResponse(statusCode: 200, type: typeof(List<PackageMetadata>), description: "Return a list of packages.")]
         public virtual IActionResult PackageByRegExGet([FromBody] string body, [FromHeader][Required()] string xAuthorization, [FromRoute][Required] string regex)
         {
-            Program.WriteLogEntry("POST-.package.byRegEx.{regex}", body.ToString() + " ; " + regex.ToString());
+            Program.WriteLogEntry("POST-.package.byRegEx.{regex}", "POST /package/byRegex/{regex}\n" + body.ToString() + "\nregex: " + regex.ToString());
 
             ActionResult response;
 
@@ -195,7 +195,7 @@ namespace PackageRegistry.Controllers
         [SwaggerResponse(statusCode: 201, type: typeof(Package), description: "Success. Check the ID in the returned metadata for the official ID.")]
         public virtual IActionResult PackageCreate([FromBody] PackageData body, [FromHeader][Required()] string xAuthorization)
         {
-            Program.WriteLogEntry("POST-.package", body.ToString());
+            Program.WriteLogEntry("POST-.package", "POST /package\n" + body.ToString());
 
             ActionResult response;
 
@@ -233,7 +233,7 @@ namespace PackageRegistry.Controllers
         [SwaggerOperation("PackageDelete")]
         public virtual IActionResult PackageDelete([FromHeader][Required()] string xAuthorization, [FromRoute][Required] string id)
         {
-            Program.WriteLogEntry("DELETE-.package.{id}", id.ToString());
+            Program.WriteLogEntry("DELETE-.package.{id}", "DELETE /package/{id}\n" + "id: " + id);
 
             ActionResult response;
 
@@ -265,7 +265,7 @@ namespace PackageRegistry.Controllers
         [SwaggerResponse(statusCode: 200, type: typeof(PackageRating), description: "Return the rating. Only use this if each metric was computed successfully.")]
         public virtual IActionResult PackageRate([FromRoute][Required] string id, [FromHeader][Required()] string xAuthorization)
         {
-            Program.WriteLogEntry("GET-.package.{id}.rate", id.ToString());
+            Program.WriteLogEntry("GET-.package.{id}.rate", "GET /package/{id}/rate\n" + "id: " + id);
 
             ActionResult response;
 
@@ -307,7 +307,7 @@ namespace PackageRegistry.Controllers
         [SwaggerResponse(statusCode: 0, type: typeof(Error), description: "unexpected error")]
         public virtual IActionResult PackageRetrieve([FromHeader][Required()] string xAuthorization, [FromRoute][Required] string id)
         {
-            Program.WriteLogEntry("GET-.package.{id}", id.ToString());
+            Program.WriteLogEntry("GET-.package.{id}", "GET /package/{id}\n" + "id: " + id);
 
             ActionResult response;
 
@@ -347,7 +347,7 @@ namespace PackageRegistry.Controllers
         [SwaggerOperation("PackageUpdate")]
         public virtual IActionResult PackageUpdate([FromBody] Package body, [FromHeader][Required()] string xAuthorization, [FromRoute][Required] string id)
         {
-            Program.WriteLogEntry("PUT-.package.{id}", body.ToString() + " ; id: " + id);
+            Program.WriteLogEntry("PUT-.package.{id}", "PUT /package/{id}\n" + body.ToString() + "\nid: " + id);
 
             ActionResult response;
 
@@ -382,7 +382,7 @@ namespace PackageRegistry.Controllers
         [SwaggerResponse(statusCode: 0, type: typeof(Error), description: "unexpected error")]
         public virtual IActionResult PackagesList([FromBody] List<PackageQuery> body, [FromHeader][Required()] string xAuthorization, [FromQuery] string offset)
         {
-            Program.WriteLogEntry("POST-.packages", body.ToString() + " ; offset: " + offset);
+            Program.WriteLogEntry("POST-.packages", "POST /packages\n" + body.ToString() + "\noffset: " + offset);
 
             ActionResult response;
 
@@ -420,7 +420,7 @@ namespace PackageRegistry.Controllers
         [SwaggerOperation("RegistryReset")]
         public virtual IActionResult RegistryReset([FromHeader][Required()] string xAuthorization)
         {
-            Program.WriteLogEntry("DELETE-.reset", "");
+            Program.WriteLogEntry("DELETE-.reset", "DELETE /reset\n");
 
             ActionResult response;
 
