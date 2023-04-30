@@ -57,7 +57,7 @@ namespace PackageRegistry.Controllers
 
             //TODO: Uncomment the next line to return response 501 or use other options such as return this.NotFound(), return this.BadRequest(..),-...
             response = StatusCode(501);
-            Console.WriteLine(response);
+            Program.WriteLogEntry("PUT-.authenticate", "PUT /authenticate\n" + "response: " + response.ToString());
 
             return response;
             // string exampleJson = null;
