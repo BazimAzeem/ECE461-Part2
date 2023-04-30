@@ -1,8 +1,16 @@
 using System;
 using System.Text;
 using System.IO;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore;
+using Google.Api;
+using Google.Api.Gax.Grpc;
+using Google.Api.Gax.ResourceNames;
+using Google.Cloud.Logging.V2;
+using Google.Cloud.Logging.Type;
+using Grpc.Core;
+
 
 namespace PackageRegistry
 {
@@ -136,6 +144,35 @@ namespace PackageRegistry
             {
                 log.AppendLine(outmsg);
             }
+        }
+
+        private static readonly CallSettings _retryAWhile = CallSettings.FromRetry(
+            RetrySettings.FromExponentialBackoff(
+                maxAttempts: 15,
+                initialBackoff: TimeSpan.FromSeconds(3),
+                maxBackoff: TimeSpan.FromSeconds(12),
+                backoffMultiplier: 2.0,
+                retryFilter: RetrySettings.FilterForStatusCodes(StatusCode.Internal, StatusCode.DeadlineExceeded)));
+
+        public static void WriteLogEntry(string logId, string message)
+        {
+            var client = LoggingServiceV2Client.Create();
+            LogName logName = new LogName("ece-461-380500", logId);
+            LogEntry logEntry = new LogEntry
+            {
+                LogNameAsLogName = logName,
+                Severity = LogSeverity.Debug,
+                TextPayload = message
+            };
+            MonitoredResource resource = new MonitoredResource { Type = "global" };
+            IDictionary<string, string> entryLabels = new Dictionary<string, string>
+                {
+                    { "size", "large" },
+                    { "color", "red" }
+                };
+            client.WriteLogEntries(logName, resource, entryLabels,
+                new[] { logEntry }, _retryAWhile);
+            Console.WriteLine($"Created log entry in log-id: {logId}.");
         }
     }
 }

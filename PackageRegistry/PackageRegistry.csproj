@@ -14,6 +14,7 @@
     <PackageReference Include="Npgsql" Version="7.0.2" />
     <PackageReference Include="Octokit" Version="5.0.0" />
     <PackageReference Include="Octokit.GraphQL" Version="0.2.0-beta" />
+    <PackageReference Include="Google.Cloud.Logging.V2" Version="4.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="5.5.1"/>
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="5.5.1"/>
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="5.5.1"/>

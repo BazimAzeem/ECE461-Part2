@@ -22,7 +22,7 @@ namespace PackageRegistry
             this.Create();
         }
 
-        private async void Create()
+        private void Create()
         {
             String schemaStr = String.Join(", ", this.schema.Select(x => x.Key + " " + x.Value).ToArray());
             if (this.constraints != null)
@@ -32,8 +32,8 @@ namespace PackageRegistry
             }
 
             String query = String.Format("CREATE TABLE IF NOT EXISTS {0} ({1})", this.name, schemaStr);
-            await using var command = this.dataSource.CreateCommand(query);
-            await command.ExecuteNonQueryAsync();
+            using var command = this.dataSource.CreateCommand(query);
+            command.ExecuteNonQuery();
         }
 
         public async void Select(List<String> columns, Dictionary<String, String> where = null)
@@ -50,16 +50,15 @@ namespace PackageRegistry
             await using var command = this.dataSource.CreateCommand(query);
             object id = await command.ExecuteScalarAsync();
 
-            Console.WriteLine(query);
-            if (id == null)
-                Console.WriteLine("null");
-            else
-                Console.WriteLine("not null");
-
             return (int)id;
         }
 
         public async void Update(List<String> columns, Dictionary<String, String> where = null)
+        {
+
+        }
+
+        public async void Delete(Dictionary<String, String> where = null)
         {
 
         }

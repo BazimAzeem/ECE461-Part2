@@ -44,7 +44,8 @@ namespace PackageRegistry
                     "CHECK((license_score >= 0 AND license_score <= 1) OR license_score = -1)",
                     "CHECK((good_pinning_score >= 0 AND good_pinning_score <= 1) OR good_pinning_score = -1)",
                     "CHECK((pull_request_score >= 0 AND pull_request_score <= 1) OR pull_request_score = -1)",
-                    "CHECK((net_score >= 0 AND net_score <= 1) OR net_score = -1)"
+                    "CHECK((net_score >= 0 AND net_score <= 1) OR net_score = -1)",
+                    "UNIQUE(name, version_major, version_minor, version_patch)"
                 }
             );
         }
@@ -79,6 +80,13 @@ namespace PackageRegistry
         //     }
         // }
 
+        // TODO
+        // public async Task InsertIntoPackage()
+        // {
+        //     await using var command = this.dataSource.CreateCommand("INSERT INTO package () VALUES");
+        //     await command.ExecuteNonQueryAsync();
+        // }
+
         // // Delete all from package table
         // public async Task DeleteFromPackage()
         // {
@@ -101,12 +109,6 @@ namespace PackageRegistry
         //     await command.ExecuteNonQueryAsync();
         // }
 
-        // // TODO
-        // public async Task InsertIntoPackage()
-        // {
-        //     await using var command = this.dataSource.CreateCommand("INSERT INTO package () VALUES");
-        //     await command.ExecuteNonQueryAsync();
-        // }
 
     }
 }
