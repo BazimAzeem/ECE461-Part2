@@ -16,6 +16,8 @@ namespace PackageRegistry.MetricsCalculation
         public float score = -1;
 
         private List<Metric> metrics = new List<Metric>();
+
+        public Metric rampup, correctness, busfactor, responsiveMaintainer, license, prRatio, versionPinning;
         public List<Task> calcMetricTaskQueue = new List<Task>();
 
         public MetricsCalculator(string url)
@@ -43,12 +45,21 @@ namespace PackageRegistry.MetricsCalculation
             }
 
             // add metrics to metric list 
-            metrics.Add(new RampUp(this));
-            metrics.Add(new Correctness(this));
-            metrics.Add(new BusFactor(this));
-            metrics.Add(new ResponsiveMaintainer(this));
-            metrics.Add(new LicenseMetric(this));
-            metrics.Add(new PRRatio(this));
+            rampup = new RampUp(this);
+            correctness = new Correctness(this);
+            busfactor = new BusFactor(this);
+            responsiveMaintainer = new ResponsiveMaintainer(this);
+            license = new LicenseMetric(this);
+            prRatio = new PRRatio(this);
+            versionPinning = new VersionPinning(this);
+
+            metrics.Add(rampup);
+            metrics.Add(correctness);
+            metrics.Add(busfactor);
+            metrics.Add(responsiveMaintainer);
+            metrics.Add(license);
+            metrics.Add(prRatio);
+            metrics.Add(versionPinning);
 
             // start the metrics calculating
             foreach (Metric m in metrics)

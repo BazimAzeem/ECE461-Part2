@@ -11,6 +11,8 @@ using static Octokit.GraphQL.Variable;
 using Connection = Octokit.GraphQL.Connection;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text;
+using System.Text.Json;
 
 
 namespace PackageRegistry.MetricsCalculation
@@ -468,7 +470,7 @@ namespace PackageRegistry.MetricsCalculation
             httpClient.BaseAddress = new Uri("https://api.github.com/");
             httpClient.DefaultRequestHeaders.Accept.Clear();
             httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github+json"));
-            httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("AppName", "1.0"));
+            httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("my-cool-cli", "1.0"));
 
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Token", access_token);
 
@@ -530,6 +532,98 @@ namespace PackageRegistry.MetricsCalculation
             public string Name { get; set; }
             public DateTimeOffset Date { get; set; }
             // Add more properties as needed
+        }
+    }
+
+
+    public class VersionPinning : Metric
+    {
+        HttpClient httpClient = new HttpClient();
+        // readonly int PER_PAGE = 1000;
+        public VersionPinning(MetricsCalculator parentLibrary) : base(parentLibrary)
+        {
+            this.weight = 1;
+            this.name = "VERSION_PINNING_SCORE";
+        }
+
+        private float sigmoid(float x)
+        {
+            return 1 / (1 + (float)Math.Exp(-x));
+        }
+
+        public override async Task Calculate()
+        {
+        
+            string token = Environment.GetEnvironmentVariable("GITHUB_TOKEN");
+            string owner = this.parentLibrary.owner;
+            string repo = this.parentLibrary.name;
+
+            // Set the repository owner, repository name, and path to the package.json file
+            string path = "package.json";
+
+       
+
+            // Create a HttpClient with the authorization header set to the personal access token
+            var client = httpClient;
+            httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("my-cool-cli", "1.0"));
+            client.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
+
+            // Send the GET request to retrieve the contents of the package.json file
+            var response = await client.GetAsync($"https://api.github.com/repos/{owner}/{repo}/contents/{path}");
+            var responseString = await response.Content.ReadAsStringAsync();
+
+
+
+            // Program.LogInfo(responseString);
+            
+            
+            if (responseString[0] != '{') {
+                Program.LogError("no package.json found in " + owner + "/" + repo);
+                this.score = 0.0F;
+            }else{
+                
+                try {
+                    // Parse the response JSON and extract the content of the package.json file
+                    var contentObj = JsonSerializer.Deserialize<JsonElement>(responseString);
+                    var contentBytes = Convert.FromBase64String(contentObj.GetProperty("content").GetString());
+                    var content = Encoding.UTF8.GetString(contentBytes);
+
+                    // Parse the package.json file content as a JSON object and extract the dependencies
+                    var packageJson = JsonSerializer.Deserialize<JsonElement>(content);
+                    var dependencies = packageJson.GetProperty("dependencies");
+
+                    // Print the dependencies and their versions
+                    // Program.LogDebug("Dependencies:");
+                    int dependencyCount = 0, numNotPinned = 0;
+                    foreach (var dependency in dependencies.EnumerateObject())
+                    {
+                        // Program.LogDebug($"{dependency.Name}: {dependency.Value.GetString()}");
+                        dependencyCount++;
+                        if (dependency.Value.GetString().Contains("^") || dependency.Value.GetString().Contains("~") ||  dependency.Value.GetString().Contains("*") || dependency.Value.GetString().Contains("x")) {
+                            // Program.LogDebug("not pinned");
+                            numNotPinned++;
+                        }   
+                    }
+
+                    // // Extract and print the dev dependencies
+                    // var devDependencies = packageJson.GetProperty("devDependencies");
+                    // Program.LogDebug("Dev Dependencies:");
+                    // foreach (var devDependency in devDependencies.EnumerateObject())
+                    // {
+                    //     Program.LogDebug($"{devDependency.Name}: {devDependency.Value.GetString()}");
+                    // }
+
+                    if (dependencyCount == 0) {
+                        this.score = 1.0F;
+                    }else{
+                        Program.LogDebug(dependencyCount + " dependencies found in " + owner + "/" + repo);
+                        this.score = ((float) numNotPinned ) / dependencyCount; 
+                    }
+                }catch(Exception e) {
+                    Program.LogError(owner + "/" + repo + " had an invalid package.json file");
+                    this.score = 0.0F;
+                }
+            }
         }
     }
 }
