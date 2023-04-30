@@ -209,7 +209,7 @@ namespace PackageRegistry.Controllers
             // return StatusCode(409);
 
             //TODO: Uncomment the next line to return response 424 or use other options such as return this.NotFound(), return this.BadRequest(..),-...
-            // return StatusCode(424);
+            return StatusCode(424);
             string exampleJson = null;
             exampleJson = "{\n  \"metadata\" : {\n    \"Version\" : \"1.2.3\",\n    \"ID\" : \"ID\",\n    \"Name\" : \"Name\"\n  },\n  \"data\" : {\n    \"Content\" : \"Content\",\n    \"JSProgram\" : \"JSProgram\",\n    \"URL\" : \"URL\"\n  }\n}";
 
