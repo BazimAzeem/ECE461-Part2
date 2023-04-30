@@ -13,6 +13,6 @@ services:
 
     volumes:
       - ./PackageRegistry:/home/project2/PackageRegistry
-    env_file:
-      - .env
+    # env_file:
+    #   - .env
       
