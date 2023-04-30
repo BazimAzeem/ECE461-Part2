@@ -9,14 +9,12 @@ steps:
     '.' 
   ]
 - name: 'gcr.io/cloud-builders/docker'
-  args:
-  [
+  args: [
     'push',
     'us.gcr.io/$PROJECT_ID/package-registry:latest',
   ]
 - name: 'gcr.io/cloud-builders/gcloud'
-  args:
-  [
+  args: [
     'beta',
     'run',
     'deploy',
