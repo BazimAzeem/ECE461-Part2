@@ -128,7 +128,7 @@ namespace PackageRegistry.Controllers
             // return StatusCode(400);
 
             //TODO: Uncomment the next line to return response 404 or use other options such as return this.NotFound(), return this.BadRequest(..),-...
-            // return StatusCode(404);
+            return StatusCode(404);
 
             //TODO: Uncomment the next line to return response 0 or use other options such as return this.NotFound(), return this.BadRequest(..),-...
             // return StatusCode(0, default(Error));
