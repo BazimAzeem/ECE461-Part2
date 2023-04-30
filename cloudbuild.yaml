@@ -8,4 +8,21 @@ steps:
     '--cache-from', 'us.gcr.io/$PROJECT_ID/package-registry:latest',
     '.' 
   ]
+- name: 'gcr.io/cloud-builders/docker'
+  args:
+  [
+    'push',
+    'us.gcr.io/$PROJECT_ID/package-registry:latest',
+  ]
+- name: 'gcr.io/cloud-builders/gcloud'
+  args:
+  [
+    'beta',
+    'run',
+    'deploy',
+    'package-registry',
+    '--image=us.gcr.io/$PROJECT_ID/package-registry:latest',
+    '--region=us-central1',
+  ]
+
 images: [us.gcr.io/$PROJECT_ID/package-registry:latest]
