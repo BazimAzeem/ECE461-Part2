@@ -58,24 +58,6 @@ namespace PackageRegistry
                 LOG_FILE = log_file_env_var;
             }
 
-            Console.WriteLine(LogSeverity.Debug);
-
-            // Test metric stuff
-            var calculator1 = new MetricsCalculation.MetricsCalculator("https://github.com/BazimAzeem/ECE461-Part2");
-            var calculator2 = new MetricsCalculation.MetricsCalculator("https://github.com/npm/cli");
-            var calculator3 = new MetricsCalculation.MetricsCalculator("https://github.com/microsoft/vscode");
-            var calculator4 = new MetricsCalculation.MetricsCalculator("https://github.com/shinout/browser");
-            calculator1.Calculate();
-            calculator2.Calculate();
-            calculator3.Calculate();
-            calculator4.Calculate();
-            LogInfo(calculator1.ToString());
-            LogInfo(calculator2.ToString());
-            LogInfo(calculator3.ToString());
-            LogInfo(calculator4.ToString());
-
-
-
             try
             {
                 CreateWebHostBuilder(args).Build().Run();
@@ -102,9 +84,6 @@ namespace PackageRegistry
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
     WebHost.CreateDefaultBuilder(args)
         .UseStartup<Startup>();
-
-
-
 
         public void AppendToLog()
         {
@@ -149,7 +128,7 @@ namespace PackageRegistry
         public static void LogWarning(string msg)
         {
 
-            string outmsg = "WARNING" + msg;
+            string outmsg = "[WARNING]" + msg;
 
             if (LOG_LEVEL >= 1)
             {
