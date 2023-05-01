@@ -74,9 +74,7 @@ namespace PackageRegistry
 			LogInfo(calculator3.ToString());
 			LogInfo(calculator4.ToString());
 
-			// TODO 
-			// FIXME Delete this!
-			return;
+			
 
 			try {
            		CreateWebHostBuilder(args).Build().Run();
