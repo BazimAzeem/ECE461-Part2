@@ -82,7 +82,7 @@ namespace PackageRegistry.Controllers
         [Route("/package/byName/{name}")]
         [ValidateModelState]
         [SwaggerOperation("PackageByNameDelete")]
-        public virtual IActionResult PackageByNameDelete([FromHeader][Required()] string xAuthorization, [FromRoute][Required] string name)
+        public virtual IActionResult PackageByNameDelete([FromHeader] string xAuthorization, [FromRoute][Required] string name)
         {
             Program.LogDebug("Request: DELETE /package/byName/{name}\n" + "name: " + name.ToString());
 
@@ -116,7 +116,7 @@ namespace PackageRegistry.Controllers
         [SwaggerOperation("PackageByNameGet")]
         [SwaggerResponse(statusCode: 200, type: typeof(List<PackageHistoryEntry>), description: "Return the package history.")]
         [SwaggerResponse(statusCode: 0, type: typeof(Error), description: "unexpected error")]
-        public virtual IActionResult PackageByNameGet([FromRoute][Required] string name, [FromHeader][Required()] string xAuthorization)
+        public virtual IActionResult PackageByNameGet([FromRoute][Required] string name, [FromHeader] string xAuthorization)
         {
             Program.LogDebug("Request: GET /package/byName/{name}\n" + "name: " + name.ToString());
 
@@ -157,7 +157,7 @@ namespace PackageRegistry.Controllers
         [ValidateModelState]
         [SwaggerOperation("PackageByRegExGet")]
         [SwaggerResponse(statusCode: 200, type: typeof(List<PackageMetadata>), description: "Return a list of packages.")]
-        public async virtual Task<IActionResult> PackageByRegExGet([FromBody] string body, [FromHeader][Required()] string xAuthorization, [FromRoute][Required] string regex)
+        public async virtual Task<IActionResult> PackageByRegExGet([FromBody] string body, [FromHeader] string xAuthorization, [FromRoute][Required] string regex)
         {
             Program.LogDebug("Request: POST /package/byRegex/{regex}\n" + body.ToString() + "\nregex: " + regex.ToString());
 
@@ -194,7 +194,7 @@ namespace PackageRegistry.Controllers
         [ValidateModelState]
         [SwaggerOperation("PackageCreate")]
         [SwaggerResponse(statusCode: 201, type: typeof(Package), description: "Success. Check the ID in the returned metadata for the official ID.")]
-        public async virtual Task<IActionResult> PackageCreate([FromBody] PackageData body, [FromHeader][Required()] string xAuthorization)
+        public async virtual Task<IActionResult> PackageCreate([FromBody] PackageData body, [FromHeader] string xAuthorization)
         {
             Program.LogDebug("Request: POST /package\n" + body.ToString());
 
@@ -245,7 +245,7 @@ namespace PackageRegistry.Controllers
         [Route("/package/{id}")]
         [ValidateModelState]
         [SwaggerOperation("PackageDelete")]
-        public virtual IActionResult PackageDelete([FromHeader][Required()] string xAuthorization, [FromRoute][Required] string id)
+        public virtual IActionResult PackageDelete([FromHeader] string xAuthorization, [FromRoute][Required] string id)
         {
             Program.LogDebug("Request: DELETE /package/{id}\n" + "id: " + id);
 
@@ -277,7 +277,7 @@ namespace PackageRegistry.Controllers
         [ValidateModelState]
         [SwaggerOperation("PackageRate")]
         [SwaggerResponse(statusCode: 200, type: typeof(PackageRating), description: "Return the rating. Only use this if each metric was computed successfully.")]
-        public virtual IActionResult PackageRate([FromRoute][Required] string id, [FromHeader][Required()] string xAuthorization)
+        public virtual IActionResult PackageRate([FromRoute][Required] string id, [FromHeader] string xAuthorization)
         {
             Program.LogDebug("Request: GET /package/{id}/rate\n" + "id: " + id);
 
@@ -319,7 +319,7 @@ namespace PackageRegistry.Controllers
         [SwaggerOperation("PackageRetrieve")]
         [SwaggerResponse(statusCode: 200, type: typeof(Package), description: "Return the package.")]
         [SwaggerResponse(statusCode: 0, type: typeof(Error), description: "unexpected error")]
-        public virtual IActionResult PackageRetrieve([FromHeader][Required()] string xAuthorization, [FromRoute][Required] string id)
+        public virtual IActionResult PackageRetrieve([FromHeader] string xAuthorization, [FromRoute][Required] string id)
         {
             Program.LogDebug("Request: GET /package/{id}\n" + "id: " + id);
 
@@ -359,7 +359,7 @@ namespace PackageRegistry.Controllers
         [Route("/package/{id}")]
         [ValidateModelState]
         [SwaggerOperation("PackageUpdate")]
-        public virtual IActionResult PackageUpdate([FromBody] Package body, [FromHeader][Required()] string xAuthorization, [FromRoute][Required] string id)
+        public virtual IActionResult PackageUpdate([FromBody] Package body, [FromHeader] string xAuthorization, [FromRoute][Required] string id)
         {
             Program.LogDebug("Request: PUT /package/{id}\n" + body.ToString() + "\nid: " + id);
 
@@ -394,7 +394,7 @@ namespace PackageRegistry.Controllers
         [SwaggerOperation("PackagesList")]
         [SwaggerResponse(statusCode: 200, type: typeof(List<PackageMetadata>), description: "List of packages")]
         [SwaggerResponse(statusCode: 0, type: typeof(Error), description: "unexpected error")]
-        public virtual IActionResult PackagesList([FromBody] List<PackageQuery> body, [FromHeader][Required()] string xAuthorization, [FromQuery] string offset)
+        public virtual IActionResult PackagesList([FromBody] List<PackageQuery> body, [FromHeader] string xAuthorization, [FromQuery] string offset)
         {
             Program.LogDebug("Request: POST /packages\n" + body.ToString() + "\noffset: " + offset);
 
@@ -432,7 +432,7 @@ namespace PackageRegistry.Controllers
         [Route("/reset")]
         [ValidateModelState]
         [SwaggerOperation("RegistryReset")]
-        public async virtual Task<IActionResult> RegistryReset([FromHeader][Required()] string xAuthorization)
+        public async virtual Task<IActionResult> RegistryReset([FromHeader] string xAuthorization)
         {
             Program.LogDebug("Request: DELETE /reset\n");
 
