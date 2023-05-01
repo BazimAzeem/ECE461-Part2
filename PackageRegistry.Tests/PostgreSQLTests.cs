@@ -17,7 +17,13 @@ public class PostgreSQLTests
     }
 
     [Test]
-    public async Task Test1()
+    public async Task Reset1()
+    {
+        await this.db.packageTable.Delete();
+    }
+
+    [Test]
+    public async Task Insert()
     {
         var item = new Dictionary<string, string> {
             {"name", "'bazim'"},
@@ -33,4 +39,11 @@ public class PostgreSQLTests
 
         Assert.AreEqual(id, 1);
     }
+
+    [Test]
+    public async Task Reset2()
+    {
+        await this.db.packageTable.Delete();
+    }
+
 }

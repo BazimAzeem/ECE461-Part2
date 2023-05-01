@@ -58,9 +58,17 @@ namespace PackageRegistry
 
         }
 
-        public async void Delete(Dictionary<String, String> where = null)
+        public async Task Delete(Dictionary<String, String> where = null)
         {
+            String query = String.Format("DELETE FROM {0}", this.name);
+            if (where != null)
+            {
+                String whereStr = String.Join(" AND ", this.schema.Select(x => x.Key + "=" + x.Value).ToArray());
+                query += " WHERE " + whereStr;
+            }
 
+            using var command = this.dataSource.CreateCommand(query);
+            await command.ExecuteNonQueryAsync();
         }
     }
 }
