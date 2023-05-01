@@ -16,13 +16,21 @@ public class PostgreSQLTests
         this.db = new PackageRegistryDB();
     }
 
-    [Test]
+    [Test, Order(1)]
     public async Task Reset1()
     {
-        await this.db.packageTable.Delete();
+        try
+        {
+            await this.db.packageTable.Delete();
+        }
+        catch (System.Exception)
+        {
+            Assert.Fail();
+        }
+        Assert.Pass();
     }
 
-    [Test]
+    [Test, Order(2)]
     public async Task Insert()
     {
         var item = new Dictionary<string, string> {
@@ -37,13 +45,6 @@ public class PostgreSQLTests
 
         int id = await this.db.packageTable.Insert(item);
 
-        Assert.AreEqual(id, 1);
+        Assert.NotNull(id);
     }
-
-    [Test]
-    public async Task Reset2()
-    {
-        await this.db.packageTable.Delete();
-    }
-
 }

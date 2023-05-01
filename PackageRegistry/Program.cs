@@ -26,6 +26,8 @@ namespace PackageRegistry
         public static string LOG_FILE = "./bin/log_file.txt";
         public static short ProgramStatus = 0;
         public static StringBuilder log = new StringBuilder();
+        public static LoggingServiceV2Client logClient = LoggingServiceV2Client.Create();
+
 
 
         public static int Main(String[] args)
@@ -121,7 +123,7 @@ namespace PackageRegistry
                 log.AppendLine(outmsg);
             }
 
-            WriteLogEntry("ERROR", msg);
+            WriteLogEntry("ERROR", msg, LogSeverity.Error);
 
 
         }
@@ -139,7 +141,7 @@ namespace PackageRegistry
                 log.AppendLine(outmsg);
             }
 
-            WriteLogEntry("WARNING", msg);
+            WriteLogEntry("WARNING", msg, LogSeverity.Warning);
         }
 
         public static void LogInfo(string msg)
@@ -153,7 +155,7 @@ namespace PackageRegistry
                 log.AppendLine(outmsg);
             }
 
-            WriteLogEntry("INFO", msg);
+            WriteLogEntry("INFO", msg, LogSeverity.Info);
         }
 
         public static void LogDebug(string msg)
@@ -170,6 +172,8 @@ namespace PackageRegistry
             {
                 log.AppendLine(outmsg);
             }
+
+            WriteLogEntry("DEBUG", msg, LogSeverity.Debug);
         }
 
         private static readonly CallSettings _retryAWhile = CallSettings.FromRetry(
@@ -180,14 +184,13 @@ namespace PackageRegistry
                 backoffMultiplier: 2.0,
                 retryFilter: RetrySettings.FilterForStatusCodes(StatusCode.Internal, StatusCode.DeadlineExceeded)));
 
-        public static void WriteLogEntry(string logId, string message)
+        public static void WriteLogEntry(string logId, string message, LogSeverity severity)
         {
-            var client = LoggingServiceV2Client.Create();
             LogName logName = new LogName("ece-461-380500", logId);
             LogEntry logEntry = new LogEntry
             {
                 LogNameAsLogName = logName,
-                Severity = LogSeverity.Debug,
+                Severity = severity,
                 TextPayload = message
             };
             MonitoredResource resource = new MonitoredResource { Type = "global" };
@@ -196,7 +199,7 @@ namespace PackageRegistry
                     { "size", "large" },
                     { "color", "red" }
                 };
-            client.WriteLogEntries(logName, resource, entryLabels,
+            logClient.WriteLogEntries(logName, resource, entryLabels,
                 new[] { logEntry }, _retryAWhile);
             Console.WriteLine($"Created log entry in log-id: {logId}.");
         }

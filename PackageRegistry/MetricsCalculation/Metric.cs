@@ -553,7 +553,7 @@ namespace PackageRegistry.MetricsCalculation
 
         public override async Task Calculate()
         {
-        
+
             string token = Environment.GetEnvironmentVariable("GITHUB_TOKEN");
             string owner = this.parentLibrary.owner;
             string repo = this.parentLibrary.name;
@@ -561,7 +561,7 @@ namespace PackageRegistry.MetricsCalculation
             // Set the repository owner, repository name, and path to the package.json file
             string path = "package.json";
 
-       
+
 
             // Create a HttpClient with the authorization header set to the personal access token
             var client = httpClient;
@@ -575,14 +575,18 @@ namespace PackageRegistry.MetricsCalculation
 
 
             // Program.LogInfo(responseString);
-            
-            
-            if (responseString[0] != '{') {
+
+
+            if (responseString[0] != '{')
+            {
                 Program.LogError("no package.json found in " + owner + "/" + repo);
                 this.score = 0.0F;
-            }else{
-                
-                try {
+            }
+            else
+            {
+
+                try
+                {
                     // Parse the response JSON and extract the content of the package.json file
                     var contentObj = JsonSerializer.Deserialize<JsonElement>(responseString);
                     var contentBytes = Convert.FromBase64String(contentObj.GetProperty("content").GetString());
@@ -599,10 +603,11 @@ namespace PackageRegistry.MetricsCalculation
                     {
                         // Program.LogDebug($"{dependency.Name}: {dependency.Value.GetString()}");
                         dependencyCount++;
-                        if (dependency.Value.GetString().Contains("^") || dependency.Value.GetString().Contains("~") ||  dependency.Value.GetString().Contains("*") || dependency.Value.GetString().Contains("x")) {
+                        if (dependency.Value.GetString().Contains("^") || dependency.Value.GetString().Contains("~") || dependency.Value.GetString().Contains("*") || dependency.Value.GetString().Contains("x"))
+                        {
                             // Program.LogDebug("not pinned");
                             numNotPinned++;
-                        }   
+                        }
                     }
 
                     // // Extract and print the dev dependencies
@@ -613,13 +618,18 @@ namespace PackageRegistry.MetricsCalculation
                     //     Program.LogDebug($"{devDependency.Name}: {devDependency.Value.GetString()}");
                     // }
 
-                    if (dependencyCount == 0) {
+                    if (dependencyCount == 0)
+                    {
                         this.score = 1.0F;
-                    }else{
-                        Program.LogDebug(dependencyCount + " dependencies found in " + owner + "/" + repo);
-                        this.score = ((float) numNotPinned ) / dependencyCount; 
                     }
-                }catch(Exception e) {
+                    else
+                    {
+                        Program.LogDebug(dependencyCount + " dependencies found in " + owner + "/" + repo);
+                        this.score = ((float)numNotPinned) / dependencyCount;
+                    }
+                }
+                catch (Exception e)
+                {
                     Program.LogError(owner + "/" + repo + " had an invalid package.json file");
                     this.score = 0.0F;
                 }

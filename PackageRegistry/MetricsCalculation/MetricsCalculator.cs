@@ -60,7 +60,7 @@ namespace PackageRegistry.MetricsCalculation
             metrics.Add(license);
             metrics.Add(versionPinning);
             metrics.Add(prRatio);
-            
+
 
             // start the metrics calculating
             foreach (Metric m in metrics)
