@@ -447,7 +447,7 @@ namespace PackageRegistry.MetricsCalculation
         public PRRatio(MetricsCalculator parentLibrary) : base(parentLibrary)
         {
             this.weight = 1;
-            this.name = "PULL_REQUEST_RATIO_SCORE";
+            this.name = "PullRequest";
         }
 
         private float sigmoid(float x)
@@ -543,7 +543,7 @@ namespace PackageRegistry.MetricsCalculation
         public VersionPinning(MetricsCalculator parentLibrary) : base(parentLibrary)
         {
             this.weight = 1;
-            this.name = "VERSION_PINNING_SCORE";
+            this.name = "GoodPinningPractice";
         }
 
         private float sigmoid(float x)
