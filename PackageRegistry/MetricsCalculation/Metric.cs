@@ -52,7 +52,7 @@ namespace PackageRegistry.MetricsCalculation
         public RampUp(MetricsCalculator parentLibrary) : base(parentLibrary)
         {
             this.weight = 1;
-            this.name = "RAMP_UP_SCORE";
+            this.name = "rampUp";
         }
 
         private float sigmoid(float x)
@@ -125,7 +125,7 @@ namespace PackageRegistry.MetricsCalculation
         public Correctness(MetricsCalculator parentLibrary) : base(parentLibrary)
         {
             this.weight = 1;
-            this.name = "CORRECTNESS_SCORE";
+            this.name = "correctness";
         }
 
 
@@ -213,7 +213,7 @@ namespace PackageRegistry.MetricsCalculation
         public ResponsiveMaintainer(MetricsCalculator parentLibrary) : base(parentLibrary)
         {
             this.weight = 2;
-            this.name = "RESPONSIVE_MAINTAINER_SCORE";
+            this.name = "responsiveMaintainer";
         }
 
 
@@ -277,7 +277,7 @@ namespace PackageRegistry.MetricsCalculation
         public BusFactor(MetricsCalculator parentLibrary) : base(parentLibrary)
         {
             this.weight = 1;
-            this.name = "BUS_FACTOR_SCORE";
+            this.name = "busFactor";
         }
 
         public override async Task Calculate()
@@ -343,7 +343,7 @@ namespace PackageRegistry.MetricsCalculation
         public LicenseMetric(MetricsCalculator parentLibrary) : base(parentLibrary)
         {
             this.weight = 1;
-            this.name = "LICENSE_SCORE";
+            this.name = "licenseScore";
         }
 
 
@@ -447,7 +447,7 @@ namespace PackageRegistry.MetricsCalculation
         public PRRatio(MetricsCalculator parentLibrary) : base(parentLibrary)
         {
             this.weight = 1;
-            this.name = "PullRequest";
+            this.name = "pullRequest";
         }
 
         private float sigmoid(float x)
@@ -543,7 +543,7 @@ namespace PackageRegistry.MetricsCalculation
         public VersionPinning(MetricsCalculator parentLibrary) : base(parentLibrary)
         {
             this.weight = 1;
-            this.name = "GoodPinningPractice";
+            this.name = "goodPinningPractice";
         }
 
         private float sigmoid(float x)

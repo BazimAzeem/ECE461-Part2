@@ -53,13 +53,14 @@ namespace PackageRegistry.MetricsCalculation
             prRatio = new PRRatio(this);
             versionPinning = new VersionPinning(this);
 
-            metrics.Add(rampup);
-            metrics.Add(correctness);
             metrics.Add(busfactor);
+            metrics.Add(correctness);
+            metrics.Add(rampup);
             metrics.Add(responsiveMaintainer);
             metrics.Add(license);
-            metrics.Add(prRatio);
             metrics.Add(versionPinning);
+            metrics.Add(prRatio);
+            
 
             // start the metrics calculating
             foreach (Metric m in metrics)
@@ -84,7 +85,7 @@ namespace PackageRegistry.MetricsCalculation
         public string ToOutput()
         {
 
-            string jsonBlob = "{ \"URL\":\"" + this.url + "\", \"NET_SCORE\":" + Math.Round(this.score, 2);
+            string jsonBlob = "{ \"URL\":\"" + this.url + "\", \"netScore\":" + Math.Round(this.score, 2);
             foreach (Metric m in metrics)
             {
                 jsonBlob += ", \"" + m.name + "\":" + m.GetScore();
