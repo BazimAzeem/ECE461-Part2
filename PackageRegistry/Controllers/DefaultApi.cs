@@ -163,19 +163,6 @@ namespace PackageRegistry.Controllers
 
             ActionResult response;
 
-            var item = new Dictionary<string, string> {
-            {"name", "'bazim'"},
-            {"version_major", "1"},
-            {"version_minor", "2"},
-            {"version_patch", "3"},
-            {"content", "''"},
-            {"url", "'https://github.com/pytorch/pytorch'"},
-            {"js_program", "''"},
-        };
-
-            int id = await Program.db.packageTable.Insert(item);
-
-
             //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..),-...
             // return StatusCode(200, default(List<PackageMetadata>));
 
@@ -207,7 +194,7 @@ namespace PackageRegistry.Controllers
         [ValidateModelState]
         [SwaggerOperation("PackageCreate")]
         [SwaggerResponse(statusCode: 201, type: typeof(Package), description: "Success. Check the ID in the returned metadata for the official ID.")]
-        public virtual IActionResult PackageCreate([FromBody] PackageData body, [FromHeader][Required()] string xAuthorization)
+        public async virtual Task<IActionResult> PackageCreate([FromBody] PackageData body, [FromHeader][Required()] string xAuthorization)
         {
             Program.WriteLogEntry(
                 "POST-.package",
@@ -216,6 +203,19 @@ namespace PackageRegistry.Controllers
             );
 
             ActionResult response;
+
+            var item = new Dictionary<string, string> {
+                {"name", "'bazim'"},
+                {"version_major", "1"},
+                {"version_minor", "2"},
+                {"version_patch", "3"},
+                {"content", "''"},
+                {"url", "'https://github.com/pytorch/pytorch'"},
+                {"js_program", "''"},
+            };
+
+            int id = await Program.db.packageTable.Insert(item);
+
 
             //TODO: Uncomment the next line to return response 201 or use other options such as return this.NotFound(), return this.BadRequest(..),-...
             // return StatusCode(201, default(Package));
