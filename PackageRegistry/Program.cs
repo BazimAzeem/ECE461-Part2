@@ -16,10 +16,10 @@ namespace PackageRegistry
 {
     public class Program
     {
+        public static PackageRegistryDB db = new PackageRegistryDB();
+
         // parameters
         public const double REQUEST_TIMEOUT_TIME = 10;
-
-
 
         // members
         public static short LOG_LEVEL = 1; // 0 is silent, 1 means informational messages, 2 means debug messages

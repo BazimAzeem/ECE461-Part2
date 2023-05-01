@@ -9,6 +9,7 @@
  */
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using Swashbuckle.AspNetCore.SwaggerGen;
@@ -45,7 +46,7 @@ namespace PackageRegistry.Controllers
         {
             Program.WriteLogEntry("PUT-.authenticate", "PUT /authenticate\n" + body.ToString());
 
-            ActionResult response;
+            int code;
             //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..),-...
             // response = StatusCode(200, default(string));
 
@@ -56,10 +57,10 @@ namespace PackageRegistry.Controllers
             // return StatusCode(401);
 
             //TODO: Uncomment the next line to return response 501 or use other options such as return this.NotFound(), return this.BadRequest(..),-...
-            response = StatusCode(501);
-            Program.WriteLogEntry("PUT-.authenticate", "PUT /authenticate\n" + "response: " + response.ToString());
+            code = 501;
+            Program.WriteLogEntry("PUT-.authenticate", "PUT /authenticate\n" + "response: " + code);
 
-            return response;
+            return StatusCode(code);
             // string exampleJson = null;
             // exampleJson = "\"\"";
 
@@ -156,7 +157,7 @@ namespace PackageRegistry.Controllers
         [ValidateModelState]
         [SwaggerOperation("PackageByRegExGet")]
         [SwaggerResponse(statusCode: 200, type: typeof(List<PackageMetadata>), description: "Return a list of packages.")]
-        public virtual IActionResult PackageByRegExGet([FromBody] string body, [FromHeader][Required()] string xAuthorization, [FromRoute][Required] string regex)
+        public async virtual Task<IActionResult> PackageByRegExGet([FromBody] string body, [FromHeader][Required()] string xAuthorization, [FromRoute][Required] string regex)
         {
             Program.WriteLogEntry("POST-.package.byRegEx.{regex}", "POST /package/byRegex/{regex}\n" + body.ToString() + "\nregex: " + regex.ToString());
 
@@ -193,11 +194,28 @@ namespace PackageRegistry.Controllers
         [ValidateModelState]
         [SwaggerOperation("PackageCreate")]
         [SwaggerResponse(statusCode: 201, type: typeof(Package), description: "Success. Check the ID in the returned metadata for the official ID.")]
-        public virtual IActionResult PackageCreate([FromBody] PackageData body, [FromHeader][Required()] string xAuthorization)
+        public async virtual Task<IActionResult> PackageCreate([FromBody] PackageData body, [FromHeader][Required()] string xAuthorization)
         {
-            Program.WriteLogEntry("POST-.package", "POST /package\n" + body.ToString());
+            Program.WriteLogEntry(
+                "POST-.package",
+                "POST /package\n" +
+                body.ToString()
+            );
 
             ActionResult response;
+
+            var item = new Dictionary<string, string> {
+                {"name", "'bazim'"},
+                {"version_major", "1"},
+                {"version_minor", "2"},
+                {"version_patch", "3"},
+                {"content", "''"},
+                {"url", "'https://github.com/pytorch/pytorch'"},
+                {"js_program", "''"},
+            };
+
+            int id = await Program.db.packageTable.Insert(item);
+
 
             //TODO: Uncomment the next line to return response 201 or use other options such as return this.NotFound(), return this.BadRequest(..),-...
             // return StatusCode(201, default(Package));
@@ -418,22 +436,23 @@ namespace PackageRegistry.Controllers
         [Route("/reset")]
         [ValidateModelState]
         [SwaggerOperation("RegistryReset")]
-        public virtual IActionResult RegistryReset([FromHeader][Required()] string xAuthorization)
+        public async virtual Task<IActionResult> RegistryReset([FromHeader][Required()] string xAuthorization)
         {
             Program.WriteLogEntry("DELETE-.reset", "DELETE /reset\n");
 
-            ActionResult response;
+            int code;
 
-            //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..),-...
-            // return StatusCode(200);
+            try
+            {
+                await Program.db.packageTable.Delete();
+                code = 200;
+            }
+            catch (System.Exception)
+            {
+                code = 400;
+            }
 
-            //TODO: Uncomment the next line to return response 400 or use other options such as return this.NotFound(), return this.BadRequest(..),-...
-            // return StatusCode(400);
-
-            //TODO: Uncomment the next line to return response 401 or use other options such as return this.NotFound(), return this.BadRequest(..),-...
-            // return StatusCode(401);
-
-            throw new NotImplementedException();
+            return StatusCode(code);
         }
     }
 }
