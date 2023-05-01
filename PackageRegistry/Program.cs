@@ -58,6 +58,8 @@ namespace PackageRegistry
                 LOG_FILE = log_file_env_var;
             }
 			
+			Console.WriteLine(LogSeverity.Debug);
+
 			// Test metric stuff
 			var calculator1 = new MetricsCalculation.MetricsCalculator("https://github.com/BazimAzeem/ECE461-Part2");
 			var calculator2 = new MetricsCalculation.MetricsCalculator("https://github.com/npm/cli");
@@ -138,6 +140,8 @@ namespace PackageRegistry
                 log.AppendLine(outmsg);
             }
 
+			WriteLogEntry("[ERROR]", msg);
+
 
         }
         public static void LogWarning(string msg)
@@ -153,6 +157,8 @@ namespace PackageRegistry
 
                 log.AppendLine(outmsg);
             }
+
+			WriteLogEntry("[WARNING]", msg);
         }
 
         public static void LogInfo(string msg)
@@ -165,6 +171,8 @@ namespace PackageRegistry
 
                 log.AppendLine(outmsg);
             }
+
+			WriteLogEntry("[INFO]", msg);
         }
 
         public static void LogDebug(string msg)
