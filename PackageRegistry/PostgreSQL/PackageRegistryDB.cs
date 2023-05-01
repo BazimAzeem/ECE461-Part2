@@ -7,12 +7,12 @@ namespace PackageRegistry
     public class PackageRegistryDB : PostgreSQLDatabase
     {
         public PostgreSQLTable packageTable;
-        public PackageRegistryDB() :
+        public PackageRegistryDB(bool local = false) :
         base(
-            Environment.GetEnvironmentVariable("INSTANCE_UNIX_SOCKET"),
-            Environment.GetEnvironmentVariable("DB_USER"),
-            Environment.GetEnvironmentVariable("DB_PASS"),
-            Environment.GetEnvironmentVariable("DB_NAME")
+            local ? Environment.GetEnvironmentVariable("INSTANCE_UNIX_SOCKET_LOCAL") : Environment.GetEnvironmentVariable("INSTANCE_UNIX_SOCKET"),
+            local ? Environment.GetEnvironmentVariable("DB_USER_LOCAL") : Environment.GetEnvironmentVariable("DB_USER"),
+            local ? Environment.GetEnvironmentVariable("DB_PASS_LOCAL") : Environment.GetEnvironmentVariable("DB_PASS"),
+            local ? Environment.GetEnvironmentVariable("DB_NAME_LOCAL") : Environment.GetEnvironmentVariable("DB_NAME")
         )
         {
             this.packageTable = new PostgreSQLTable(

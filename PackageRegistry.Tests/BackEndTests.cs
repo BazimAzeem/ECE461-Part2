@@ -13,7 +13,7 @@ public class PostgreSQLTests
     [SetUp]
     public void Setup()
     {
-        this.db = new PackageRegistryDB();
+        this.db = new PackageRegistryDB(local: true);
     }
 
     [Test, Order(1)]
@@ -45,6 +45,6 @@ public class PostgreSQLTests
 
         int id = await this.db.packageTable.Insert(item);
 
-        Assert.NotNull(id);
+        Assert.NotNull(id, "id: {0}", id);
     }
 }
