@@ -332,7 +332,7 @@ namespace PackageRegistry.MetricsCalculation
             }
         }
     }
-    public class LicenseMetric : Metric
+    public class LicenseScore : Metric
     {
 
         /// The list of compatible licenses with this project
@@ -340,7 +340,7 @@ namespace PackageRegistry.MetricsCalculation
 
         string[] incompatibleLicenses = { "gplv2", "gplv2+", "gplv3", "gplv3+", "affero gplv3", "apache2.0", "mpl", "mpl 1.1" };
 
-        public LicenseMetric(MetricsCalculator parentLibrary) : base(parentLibrary)
+        public LicenseScore(MetricsCalculator parentLibrary) : base(parentLibrary)
         {
             this.weight = 1;
             this.name = "licenseScore";
@@ -440,11 +440,11 @@ namespace PackageRegistry.MetricsCalculation
         }
     }
 
-    public class PRRatio : Metric
+    public class PullRequest : Metric
     {
         HttpClient httpClient = new HttpClient();
         readonly int PER_PAGE = 1000;
-        public PRRatio(MetricsCalculator parentLibrary) : base(parentLibrary)
+        public PullRequest(MetricsCalculator parentLibrary) : base(parentLibrary)
         {
             this.weight = 1;
             this.name = "pullRequest";
@@ -536,11 +536,11 @@ namespace PackageRegistry.MetricsCalculation
     }
 
 
-    public class VersionPinning : Metric
+    public class GoodPinningPractice : Metric
     {
         HttpClient httpClient = new HttpClient();
         // readonly int PER_PAGE = 1000;
-        public VersionPinning(MetricsCalculator parentLibrary) : base(parentLibrary)
+        public GoodPinningPractice(MetricsCalculator parentLibrary) : base(parentLibrary)
         {
             this.weight = 1;
             this.name = "goodPinningPractice";

@@ -8,10 +8,10 @@ namespace PackageRegistry
     public class CLI_Translator
     {
         string packageUrl;
-        Package parentPackage;
+        ThePackage parentPackage;
         MetricsCalculation.MetricsCalculator metricsCalculator;
 
-        public CLI_Translator(string url, Package parent)
+        public CLI_Translator(string url, ThePackage parent)
         {
             this.packageUrl = url;
             this.parentPackage = parent;

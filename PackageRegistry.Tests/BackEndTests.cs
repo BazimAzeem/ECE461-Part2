@@ -47,4 +47,23 @@ public class PostgreSQLTests
 
         Assert.NotNull(id, "id: {0}", id);
     }
+
+    [Test, Order(2)]
+    public async Task InsertDuplicate()
+    {
+        var item = new Dictionary<string, string> {
+            {"name", "'bazim'"},
+            {"version_major", "1"},
+            {"version_minor", "2"},
+            {"version_patch", "3"},
+            {"content", "''"},
+            {"url", "'https://github.com/pytorch/pytorch'"},
+            {"js_program", "''"},
+        };
+
+        int id = await this.db.packageTable.Insert(item);
+
+        Assert.NotNull(id, "id: {0}", id);
+    }
+
 }

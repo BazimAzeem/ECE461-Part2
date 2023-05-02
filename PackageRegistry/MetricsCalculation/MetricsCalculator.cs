@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using PackageRegistry.Models;
 
 namespace PackageRegistry.MetricsCalculation
 {
@@ -17,49 +18,31 @@ namespace PackageRegistry.MetricsCalculation
 
         private List<Metric> metrics = new List<Metric>();
 
-        public Metric rampup, correctness, busfactor, responsiveMaintainer, license, prRatio, versionPinning;
+        public Metric RampUp, Correctness, BusFactor, ResponsiveMaintainer, LicenseScore, PullRequest, GoodPinningPractice;
         public List<Task> calcMetricTaskQueue = new List<Task>();
 
         public MetricsCalculator(string url)
         {
 
-            url = url.Contains("npmjs") ? GetUrlFromNpmUrl(url) : url;
-            this.url = url;
-
-            // get the user name and repository name
-            string[] phrases = url.Split("/");
-            if (phrases.Length <= 2)
-            {
-                Program.LogError("Invalid github url: " + url);
-                this.owner = "invalid";
-                this.name = "invalid";
-            }
-            else
-            {
-                this.owner = phrases[phrases.Length - 2];
-                this.name = phrases[phrases.Length - 1];
-                if (this.name.Contains(".git"))
-                {
-                    this.name = this.name.Substring(0, this.name.Length - 4);
-                }
-            }
+            this.url = url.Contains("npmjs") ? Package.GetUrlFromNpmUrl(url) : url;
+            (this.owner, this.name) = Package.GetOwnerAndNameFromURL(this.url);
 
             // add metrics to metric list 
-            rampup = new RampUp(this);
-            correctness = new Correctness(this);
-            busfactor = new BusFactor(this);
-            responsiveMaintainer = new ResponsiveMaintainer(this);
-            license = new LicenseMetric(this);
-            prRatio = new PRRatio(this);
-            versionPinning = new VersionPinning(this);
+            RampUp = new RampUp(this);
+            Correctness = new Correctness(this);
+            BusFactor = new BusFactor(this);
+            ResponsiveMaintainer = new ResponsiveMaintainer(this);
+            LicenseScore = new LicenseScore(this);
+            PullRequest = new PullRequest(this);
+            GoodPinningPractice = new GoodPinningPractice(this);
 
-            metrics.Add(busfactor);
-            metrics.Add(correctness);
-            metrics.Add(rampup);
-            metrics.Add(responsiveMaintainer);
-            metrics.Add(license);
-            metrics.Add(versionPinning);
-            metrics.Add(prRatio);
+            metrics.Add(BusFactor);
+            metrics.Add(Correctness);
+            metrics.Add(RampUp);
+            metrics.Add(ResponsiveMaintainer);
+            metrics.Add(LicenseScore);
+            metrics.Add(GoodPinningPractice);
+            metrics.Add(PullRequest);
 
 
             // start the metrics calculating
@@ -131,52 +114,5 @@ namespace PackageRegistry.MetricsCalculation
 
             return this.score;
         }
-
-
-        private async static Task<string> scrapeForGitUrl(string url)
-        {
-
-            // get package name from url
-            string[] phrases = url.Split("/");
-            string packageName = phrases[phrases.Length - 1];
-
-            using var client = new HttpClient();
-
-            var result = await client.GetStringAsync("https://registry.npmjs.org/" + packageName);
-
-            // HACK this may be the least robust possible way of doing this 
-            string[] tokens = result.Split("\"");
-            foreach (string s in tokens)
-            {
-                if (s.Contains("github.com"))
-                {
-                    return s;
-                }
-            }
-
-            return "no_url_found";
-
-        }
-
-        public static string GetUrlFromNpmUrl(string url)
-        {
-
-            Task<string> urlScrape = scrapeForGitUrl(url);
-
-            try
-            {
-                urlScrape.Wait(TimeSpan.FromSeconds(Program.REQUEST_TIMEOUT_TIME));
-            }
-            catch (AggregateException)
-            { // probably a 404 error
-                Program.LogError("Invalid library url: " + url);
-                return null;
-            }
-            string gitUrl = urlScrape.Result;
-
-            return gitUrl;
-        }
-
-
     }
 }

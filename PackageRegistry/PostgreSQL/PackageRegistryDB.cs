@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Npgsql;
+using PackageRegistry.Models;
 
 namespace PackageRegistry
 {
@@ -80,12 +82,23 @@ namespace PackageRegistry
         //     }
         // }
 
-        // TODO
-        // public async Task InsertIntoPackage()
-        // {
-        //     await using var command = this.dataSource.CreateCommand("INSERT INTO package () VALUES");
-        //     await command.ExecuteNonQueryAsync();
-        // }
+        public async Task<int> InsertIntoPackage(Package package)
+        {
+            Version v = new Version(package.Metadata.Version);
+
+            var item = new Dictionary<string, string> {
+            {"name", "'"+package.Metadata.Name+"'"},
+            {"version_major", v.Major.ToString()},
+            {"version_minor", v.Minor.ToString()},
+            {"version_patch", v.Patch.ToString()},
+            // {"content", "'"+package.Data.Content+"'"},
+            {"url", "'"+package.Data.URL+"'"},
+            {"js_program", "'"+package.Data.JSProgram+"'"},
+        };
+
+            int id = await this.packageTable.Insert(item);
+            return id;
+        }
 
         // // Delete all from package table
         // public async Task DeleteFromPackage()

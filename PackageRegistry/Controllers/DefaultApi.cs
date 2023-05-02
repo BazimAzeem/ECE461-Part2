@@ -19,6 +19,7 @@ using PackageRegistry.Attributes;
 using PackageRegistry.Security;
 using Microsoft.AspNetCore.Authorization;
 using PackageRegistry.Models;
+using PackageRegistry.MetricsCalculation;
 
 namespace PackageRegistry.Controllers
 {
@@ -133,13 +134,13 @@ namespace PackageRegistry.Controllers
 
             //TODO: Uncomment the next line to return response 0 or use other options such as return this.NotFound(), return this.BadRequest(..),-...
             // return StatusCode(0, default(Error));
-            string exampleJson = null;
-            exampleJson = "[ {\n  \"Action\" : \"CREATE\",\n  \"User\" : {\n    \"name\" : \"Alfalfa\",\n    \"isAdmin\" : true\n  },\n  \"PackageMetadata\" : {\n    \"Version\" : \"1.2.3\",\n    \"ID\" : \"ID\",\n    \"Name\" : \"Name\"\n  },\n  \"Date\" : \"2023-03-23T23:11:15Z\"\n}, {\n  \"Action\" : \"CREATE\",\n  \"User\" : {\n    \"name\" : \"Alfalfa\",\n    \"isAdmin\" : true\n  },\n  \"PackageMetadata\" : {\n    \"Version\" : \"1.2.3\",\n    \"ID\" : \"ID\",\n    \"Name\" : \"Name\"\n  },\n  \"Date\" : \"2023-03-23T23:11:15Z\"\n} ]";
+            // string exampleJson = null;
+            // exampleJson = "[ {\n  \"Action\" : \"CREATE\",\n  \"User\" : {\n    \"name\" : \"Alfalfa\",\n    \"isAdmin\" : true\n  },\n  \"PackageMetadata\" : {\n    \"Version\" : \"1.2.3\",\n    \"ID\" : \"ID\",\n    \"Name\" : \"Name\"\n  },\n  \"Date\" : \"2023-03-23T23:11:15Z\"\n}, {\n  \"Action\" : \"CREATE\",\n  \"User\" : {\n    \"name\" : \"Alfalfa\",\n    \"isAdmin\" : true\n  },\n  \"PackageMetadata\" : {\n    \"Version\" : \"1.2.3\",\n    \"ID\" : \"ID\",\n    \"Name\" : \"Name\"\n  },\n  \"Date\" : \"2023-03-23T23:11:15Z\"\n} ]";
 
-            var example = exampleJson != null
-            ? JsonConvert.DeserializeObject<List<PackageHistoryEntry>>(exampleJson)
-            : default(List<PackageHistoryEntry>);            //TODO: Change the data returned
-            return new ObjectResult(example);
+            // var example = exampleJson != null
+            // ? JsonConvert.DeserializeObject<List<PackageHistoryEntry>>(exampleJson)
+            // : default(List<PackageHistoryEntry>);            //TODO: Change the data returned
+            // return new ObjectResult(example);
         }
 
         /// <summary>
@@ -198,39 +199,94 @@ namespace PackageRegistry.Controllers
         {
             Program.LogDebug("Request: POST /package\n" + body.ToString());
 
-            ActionResult response;
+            int code;
+            Package package;
+            if (!string.IsNullOrWhiteSpace(body.Content) && string.IsNullOrWhiteSpace(body.URL))
+            {
+                try
+                {
+                    package = await Package.CreateFromContent(body.Content);
+                }
+                catch (System.Exception)
+                {
+                    code = 400;
+                    Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nFailed to create package from content.");
+                    return StatusCode(code);
+                }
+            }
+            else if (!string.IsNullOrWhiteSpace(body.URL) && string.IsNullOrWhiteSpace(body.Content))
+            {
+                try
+                {
+                    package = await Package.CreateFromURL(body.URL);
+                }
+                catch (System.Exception)
+                {
+                    code = 400;
+                    Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nFailed to create package from URL.");
+                    return StatusCode(code);
+                }
+            }
+            else
+            {
+                code = 400;
+                Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nInvalid request format.");
+                return StatusCode(code);
+            }
+            package.Data.JSProgram = body.JSProgram;
 
-            var item = new Dictionary<string, string> {
-                {"name", "'bazim'"},
-                {"version_major", "1"},
-                {"version_minor", "2"},
-                {"version_patch", "3"},
-                {"content", "''"},
-                {"url", "'https://github.com/pytorch/pytorch'"},
-                {"js_program", "''"},
-            };
+            MetricsCalculator mc = null;
+            try
+            {
+                mc = new MetricsCalculator(package.Data.URL);
+            }
+            catch (System.Exception)
+            {
+                code = 400;
+                Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nFailed to calculate metrics.");
+                return StatusCode(code);
+            }
 
-            int id = await Program.db.packageTable.Insert(item);
+            if (mc.Calculate() > 0.5)
+            {
+                code = 424;
+                Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nScore is too low" + "\nmetrics: " + mc.ToString());
+                return StatusCode(code);
+            }
 
+            int id = 0;
+            try
+            {
+                id = await Program.db.InsertIntoPackage(package);
+            }
+            catch (Npgsql.PostgresException e)
+            {
+                if (e.SqlState == Npgsql.PostgresErrorCodes.UniqueViolation)
+                {
+                    code = 409;
+                    Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nPackage already exists.");
+                    return StatusCode(code);
+                }
+            }
+            catch (System.Exception)
+            {
+                code = 400;
+                Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nFailed to insert package into database.");
+                return StatusCode(code);
+            }
+            package.Metadata.ID = id.ToString();
 
-            //TODO: Uncomment the next line to return response 201 or use other options such as return this.NotFound(), return this.BadRequest(..),-...
-            // return StatusCode(201, default(Package));
+            code = 201;
+            Program.LogDebug("Response: POST /package\n" + "response: " + code + "\npackage: " + package.ToString());
+            return StatusCode(code, package);
 
-            //TODO: Uncomment the next line to return response 400 or use other options such as return this.NotFound(), return this.BadRequest(..),-...
-            // return StatusCode(400);
+            // string exampleJson = null;
+            // exampleJson = "{\n  \"metadata\" : {\n    \"Version\" : \"1.2.3\",\n    \"ID\" : \"ID\",\n    \"Name\" : \"Name\"\n  },\n  \"data\" : {\n    \"Content\" : \"Content\",\n    \"JSProgram\" : \"JSProgram\",\n    \"URL\" : \"URL\"\n  }\n}";
 
-            //TODO: Uncomment the next line to return response 409 or use other options such as return this.NotFound(), return this.BadRequest(..),-...
-            // return StatusCode(409);
-
-            //TODO: Uncomment the next line to return response 424 or use other options such as return this.NotFound(), return this.BadRequest(..),-...
-            return StatusCode(424);
-            string exampleJson = null;
-            exampleJson = "{\n  \"metadata\" : {\n    \"Version\" : \"1.2.3\",\n    \"ID\" : \"ID\",\n    \"Name\" : \"Name\"\n  },\n  \"data\" : {\n    \"Content\" : \"Content\",\n    \"JSProgram\" : \"JSProgram\",\n    \"URL\" : \"URL\"\n  }\n}";
-
-            var example = exampleJson != null
-            ? JsonConvert.DeserializeObject<Package>(exampleJson)
-            : default(Package);            //TODO: Change the data returned
-            return new ObjectResult(example);
+            // var example = exampleJson != null
+            // ? JsonConvert.DeserializeObject<Package>(exampleJson)
+            // : default(Package);            //TODO: Change the data returned
+            // return new ObjectResult(example);
         }
 
         /// <summary>

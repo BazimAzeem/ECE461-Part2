@@ -10,13 +10,20 @@
 using System;
 using System.Linq;
 using System.IO;
+using System.IO.Compression;
 using System.Text;
+using System.Text.Json;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
+using System.Threading.Tasks;
+using System.Net.Http;
+using System.Net.Http.Headers;
+
 using Newtonsoft.Json;
+using ICSharpCode.SharpZipLib.Zip;
 
 namespace PackageRegistry.Models
 {
@@ -41,6 +48,141 @@ namespace PackageRegistry.Models
 
         [DataMember(Name = "data")]
         public PackageData Data { get; set; }
+
+        public Package()
+        {
+            this.Metadata = new PackageMetadata();
+            this.Data = new PackageData();
+        }
+
+        public static async Task<Package> CreateFromContent(string content)
+        {
+            var json = GetPackageJSON(content);
+            Package package = new Package();
+            package.Metadata.Name = json.GetProperty("name").ToString();
+            package.Metadata.Version = json.GetProperty("version").ToString();
+            package.Data.Content = content;
+            package.Data.URL = json.GetProperty("homepage").ToString();
+
+            return package;
+        }
+
+        public static async Task<Package> CreateFromURL(string url)
+        {
+            string content = await GetContentFromURL(url);
+            var json = GetPackageJSON(content);
+            Package package = new Package();
+            package.Metadata.Name = json.GetProperty("name").ToString();
+            package.Metadata.Version = json.GetProperty("version").ToString();
+            package.Data.Content = content;
+            package.Data.URL = url;
+
+            return package;
+        }
+
+        public static async Task<string> GetContentFromURL(string url)
+        {
+            url = url.Contains("npmjs") ? Package.GetUrlFromNpmUrl(url) : url;
+            string token = Environment.GetEnvironmentVariable("GITHUB_TOKEN");
+            (string owner, string name) = GetOwnerAndNameFromURL(url);
+
+            HttpClient httpClient = new HttpClient();
+            var client = httpClient;
+            httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("my-cool-cli", "1.0"));
+            client.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
+            var response = await client.GetAsync($"https://api.github.com/repos/{owner}/{name}/zipball/");
+            Byte[] responseBytes = await response.Content.ReadAsByteArrayAsync();
+            string responseString = Convert.ToBase64String(responseBytes);
+
+            return responseString;
+        }
+
+        private static JsonElement GetPackageJSON(string content)
+        {
+            Byte[] bytes = Convert.FromBase64String(content);
+            MemoryStream mem = new MemoryStream(bytes);
+            ZipArchive zip = new ZipArchive(mem);
+            ZipArchiveEntry packageJsonEntry = null;
+            foreach (ZipArchiveEntry entry in zip.Entries)
+            {
+                if (entry.Name == "package.json")
+                {
+                    packageJsonEntry = zip.GetEntry(entry.FullName);
+                    break;
+                }
+            }
+            StreamReader packageJsonReader = new StreamReader(packageJsonEntry.Open());
+            string packageJsonContent = packageJsonReader.ReadToEnd();
+            var json = System.Text.Json.JsonSerializer.Deserialize<JsonElement>(packageJsonContent);
+
+            return json;
+        }
+
+        public static (string, string) GetOwnerAndNameFromURL(string url)
+        {
+            string owner, name;
+            string[] phrases = url.Split("/");
+            if (phrases.Length <= 2)
+            {
+                Program.LogError("Invalid github url: " + url);
+                owner = "invalid";
+                name = "invalid";
+            }
+            else
+            {
+                owner = phrases[phrases.Length - 2];
+                name = phrases[phrases.Length - 1];
+                if (name.Contains(".git"))
+                {
+                    name = name.Substring(0, name.Length - 4);
+                }
+            }
+            return (owner, name);
+        }
+
+        public static string GetUrlFromNpmUrl(string url)
+        {
+
+            Task<string> urlScrape = scrapeForGitUrl(url);
+
+            try
+            {
+                urlScrape.Wait(TimeSpan.FromSeconds(Program.REQUEST_TIMEOUT_TIME));
+            }
+            catch (AggregateException)
+            { // probably a 404 error
+                Program.LogError("Invalid library url: " + url);
+                return null;
+            }
+            string gitUrl = urlScrape.Result;
+
+            return gitUrl;
+        }
+
+        private async static Task<string> scrapeForGitUrl(string url)
+        {
+
+            // get package name from url
+            string[] phrases = url.Split("/");
+            string packageName = phrases[phrases.Length - 1];
+
+            using var client = new HttpClient();
+
+            var result = await client.GetStringAsync("https://registry.npmjs.org/" + packageName);
+
+            // HACK this may be the least robust possible way of doing this 
+            string[] tokens = result.Split("\"");
+            foreach (string s in tokens)
+            {
+                if (s.Contains("github.com"))
+                {
+                    return s;
+                }
+            }
+
+            return "no_url_found";
+
+        }
 
         /// <summary>
         /// Returns the string presentation of the object
