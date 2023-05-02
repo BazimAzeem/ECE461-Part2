@@ -25,11 +25,11 @@ then
     cd PackageRegistry && dotnet clean && cd ..
 elif [[ $1 == "test" ]]
 then
-    cd ECE461-Project-Part1-Handoff-CLI && ./run test && cd ..
-    cd PackageRegistry && dotnet test && cd ..
+    # cd ECE461-Project-Part1-Handoff-CLI && ./run test && cd ..
+    dotnet test
 else
 
     cd PackageRegistry || exit
-    dotnet run "$@"
+    dotnet run /p:DefineConstants=NO_GCP "$@" 
     # ./ECE461-Project-Part1-Handoff-CLI/run "$@"
 fi

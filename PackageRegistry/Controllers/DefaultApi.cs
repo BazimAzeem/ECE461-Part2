@@ -203,6 +203,7 @@ namespace PackageRegistry.Controllers
         [SwaggerResponse(statusCode: 201, type: typeof(Package), description: "Success. Check the ID in the returned metadata for the official ID.")]
         public async virtual Task<IActionResult> PackageCreate([FromBody] PackageData body, [FromHeader] string xAuthorization)
         {
+            #if !NO_GCP
             Program.LogDebug("Request: POST /package\n" + body.ToString());
 
             int code;
@@ -299,6 +300,9 @@ namespace PackageRegistry.Controllers
             // ? JsonConvert.DeserializeObject<Package>(exampleJson)
             // : default(Package);            //TODO: Change the data returned
             // return new ObjectResult(example);
+            #else
+            return StatusCode(400);
+            #endif
         }
 
         /// <summary>
@@ -518,6 +522,7 @@ namespace PackageRegistry.Controllers
         [SwaggerOperation("RegistryReset")]
         public async virtual Task<IActionResult> RegistryReset([FromHeader] string xAuthorization)
         {
+            #if !NO_GCP
             Program.LogDebug("Request: DELETE /reset\n");
 
             int code;
@@ -542,6 +547,9 @@ namespace PackageRegistry.Controllers
 
             //TODO: Uncomment the next line to return response 400 or use other options such as return this.NotFound(), return this.BadRequest(..),-...
             // return StatusCode(401);
+            #else
+            return StatusCode(400);
+            #endif
         }
     }
 }
