@@ -529,7 +529,6 @@ namespace PackageRegistry.Controllers
                 return StatusCode(code);
             }
 
-
             bool exists = false;
             try
             {
