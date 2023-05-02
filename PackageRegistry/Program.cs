@@ -26,7 +26,7 @@ namespace PackageRegistry
         public static string LOG_FILE = "./bin/log_file.txt";
         public static short ProgramStatus = 0;
         public static StringBuilder log = new StringBuilder();
-        // public static LoggingServiceV2Client logClient = LoggingServiceV2Client.Create();
+        public static LoggingServiceV2Client logClient = LoggingServiceV2Client.Create();
 
 
 
@@ -199,8 +199,8 @@ namespace PackageRegistry
                     { "size", "large" },
                     { "color", "red" }
                 };
-            // logClient.WriteLogEntries(logName, resource, entryLabels,
-            //     new[] { logEntry }, _retryAWhile);
+            logClient.WriteLogEntries(logName, resource, entryLabels,
+                new[] { logEntry }, _retryAWhile);
             Console.WriteLine($"Created log entry in log-id: {logId}.");
         }
     }

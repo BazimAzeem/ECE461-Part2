@@ -247,7 +247,7 @@ namespace PackageRegistry.Controllers
                 return StatusCode(code);
             }
 
-            if (mc.Calculate() > 0.5)
+            if (mc.Calculate() < 0.5)
             {
                 code = 424;
                 Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nScore is too low" + "\nmetrics: " + mc.ToString());
