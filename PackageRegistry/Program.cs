@@ -10,13 +10,15 @@ using Google.Api.Gax.ResourceNames;
 using Google.Cloud.Logging.V2;
 using Google.Cloud.Logging.Type;
 using Grpc.Core;
-
+using PackageRegistry.MetricsCalculation;
 
 namespace PackageRegistry
 {
     public class Program
     {
+        #if !NO_GCP
         public static PackageRegistryDB db = new PackageRegistryDB();
+        #endif
 
         // parameters
         public const double REQUEST_TIMEOUT_TIME = 10;
@@ -26,7 +28,10 @@ namespace PackageRegistry
         public static string LOG_FILE = "./bin/log_file.txt";
         public static short ProgramStatus = 0;
         public static StringBuilder log = new StringBuilder();
+
+        #if !NO_GCP
         public static LoggingServiceV2Client logClient = LoggingServiceV2Client.Create();
+        #endif
 
 
 
@@ -60,6 +65,26 @@ namespace PackageRegistry
                 LOG_FILE = log_file_env_var;
             }
 
+            #if !NO_GCP
+            string[] urls = new string[] {"https://github.com/lodash/lodash", "https://github.com/taylorhakes/fecha", "https://github.com/axios/axios","https://github.com/cloudinary/cloudinary_npm"};
+
+            MetricsCalculator[] metricsCalculators = new MetricsCalculator[urls.Length];
+
+            for (int i = 0; i < urls.Length; i++){
+                metricsCalculators[i] = new MetricsCalculator(urls[i]);
+                metricsCalculators[i].Calculate();
+            }
+
+            
+            for (int i = 0; i < urls.Length; i++){
+                Console.WriteLine(metricsCalculators[i].ToString());
+            }
+            return;
+
+            #endif
+
+
+
             try
             {
                 CreateWebHostBuilder(args).Build().Run();
@@ -76,6 +101,8 @@ namespace PackageRegistry
 
                 LogError("Unexcepted exception occured in CreateWebHostBuilder " + logMessage);
             }
+
+            
         }
 
         /// <summary>
@@ -123,7 +150,9 @@ namespace PackageRegistry
                 log.AppendLine(outmsg);
             }
 
+    
             WriteLogEntry("ERROR", msg, LogSeverity.Error);
+         
 
 
         }
@@ -186,6 +215,7 @@ namespace PackageRegistry
 
         public static void WriteLogEntry(string logId, string message, LogSeverity severity)
         {
+            #if !NO_GCP
             LogName logName = new LogName("ece-461-380500", logId);
             LogEntry logEntry = new LogEntry
             {
@@ -202,6 +232,7 @@ namespace PackageRegistry
             logClient.WriteLogEntries(logName, resource, entryLabels,
                 new[] { logEntry }, _retryAWhile);
             Console.WriteLine($"Created log entry in log-id: {logId}.");
+            #endif
         }
     }
 }
