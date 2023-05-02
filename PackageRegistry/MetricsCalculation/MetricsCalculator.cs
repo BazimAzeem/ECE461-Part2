@@ -10,9 +10,9 @@ namespace PackageRegistry.MetricsCalculation
 {
     public class MetricsCalculator
     {
-        const short ERROR_SUCCESS = 0;
-        const short ERROR_WARNING = 1;
-        const short ERROR_ERROR = 2;
+        public static readonly short ERROR_SUCCESS = 0;
+        public static readonly short ERROR_WARNING = 1;
+        public static readonly short ERROR_ERROR = 2;
         public string url;
         public string owner, name;
 

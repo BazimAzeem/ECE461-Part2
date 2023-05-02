@@ -80,6 +80,16 @@ namespace PackageRegistry
             return package;
         }
 
+        public async Task<string> SelectURLFromPackage(int id)
+        {
+            var columns = new List<string> { "url" };
+            var where = new Dictionary<string, string> { { "id", id.ToString() } };
+            var rows = await this.packageTable.Select(columns, where);
+
+            return rows[0]["url"].ToString();
+        }
+
+
         public async Task<bool> ExistsInPackageTable(int id)
         {
             var columns = new List<string> { "id" };
@@ -94,7 +104,7 @@ namespace PackageRegistry
             Version version = new Version(metadata.Version);
             var where = new Dictionary<string, string> {
                 { "id", metadata.ID},
-                { "name", metadata.Name},
+                { "name", "'"+metadata.Name+"'"},
                 {"version_major" , version.Major.ToString()},
                 {"version_minor" , version.Minor.ToString()},
                 {"version_patch" , version.Patch.ToString()},

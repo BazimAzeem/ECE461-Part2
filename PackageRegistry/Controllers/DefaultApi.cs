@@ -246,6 +246,12 @@ namespace PackageRegistry.Controllers
             try
             {
                 mc = new MetricsCalculator(package.Data.URL);
+                if (mc.error_level == MetricsCalculator.ERROR_ERROR)
+                {
+                    code = 400;
+                    Program.LogDebug("Response: PUT/package/{id}\n" + "response: " + code + "\nError in metric calculations.");
+                    return StatusCode(code);
+                }
             }
             catch (System.Exception e)
             {
@@ -372,11 +378,74 @@ namespace PackageRegistry.Controllers
         [ValidateModelState]
         [SwaggerOperation("PackageRate")]
         [SwaggerResponse(statusCode: 200, type: typeof(PackageRating), description: "Return the rating. Only use this if each metric was computed successfully.")]
-        public virtual IActionResult PackageRate([FromRoute][Required] string id, [FromHeader] string xAuthorization)
+        public async virtual Task<IActionResult> PackageRate([FromRoute][Required] string id, [FromHeader] string xAuthorization)
         {
             Program.LogDebug("Request: GET /package/{id}/rate\n" + "id: " + id);
 
-            ActionResult response;
+            int code;
+
+            bool exists = false;
+            try
+            {
+                exists = await Program.db.ExistsInPackageTable(Int32.Parse(id));
+            }
+            catch (System.Exception e)
+            {
+                code = 400;
+                Program.LogDebug("Response: GET /package/{id}/rate\n" + "response: " + code + "\nCould not check exists." + "\nid: " + id + "\nexception: " + e.ToString());
+                return StatusCode(code);
+            }
+
+            if (!exists)
+            {
+                code = 404;
+                Program.LogDebug("Response: GET /package/{id}/rate\n" + "response: " + code + "\nPackage does not exist." + "\nid: " + id);
+                return StatusCode(code);
+            }
+
+            string url = null;
+            try
+            {
+                url = await Program.db.SelectURLFromPackage(Int32.Parse(id));
+            }
+            catch (System.Exception e)
+            {
+                code = 400;
+                Program.LogDebug("Response: GET /package/{id}/rate\n" + "response: " + code + "\nCould not fetch URL." + "\nid: " + id + "\nexception: " + e.ToString());
+                return StatusCode(code);
+            }
+
+            MetricsCalculator mc = null;
+            try
+            {
+                mc = new MetricsCalculator(url);
+                if (mc.error_level == MetricsCalculator.ERROR_ERROR)
+                {
+                    code = 500;
+                    Program.LogDebug("Response: GET /package/{id}/rate\n" + "response: " + code + "\nError in metric calculations.");
+                    return StatusCode(code);
+                }
+            }
+            catch (System.Exception e)
+            {
+                code = 500;
+                Program.LogDebug("Response: GET /package/{id}/rate\n" + "response: " + code + "\nFailed to calculate metrics." + "\nexception: " + e.ToString());
+                return StatusCode(code);
+            }
+
+            PackageRating rating = new PackageRating();
+            rating.NetScore = mc.Calculate();
+            rating.BusFactor = mc.BusFactor.score;
+            rating.Correctness = mc.Correctness.score;
+            rating.RampUp = mc.RampUp.score;
+            rating.ResponsiveMaintainer = mc.ResponsiveMaintainer.score;
+            rating.LicenseScore = mc.LicenseScore.score;
+            rating.GoodPinningPractice = mc.GoodPinningPractice.score;
+            rating.PullRequest = mc.PullRequest.score;
+
+            code = 200;
+            Program.LogDebug("Response: GET /package/{id}/rate\n" + "response: " + code + "\nrating: " + rating.ToString());
+            return StatusCode(code, rating);
 
             //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..),-...
             // return StatusCode(200, default(PackageRating));
@@ -389,13 +458,13 @@ namespace PackageRegistry.Controllers
 
             //TODO: Uncomment the next line to return response 500 or use other options such as return this.NotFound(), return this.BadRequest(..),-...
             // return StatusCode(500);
-            string exampleJson = null;
-            exampleJson = "{\n  \"GoodPinningPractice\" : 2.3021358869347655,\n  \"NetScore\" : 9.301444243932576,\n  \"PullRequest\" : 7.061401241503109,\n  \"ResponsiveMaintainer\" : 5.962133916683182,\n  \"LicenseScore\" : 5.637376656633329,\n  \"RampUp\" : 1.4658129805029452,\n  \"BusFactor\" : 0.8008281904610115,\n  \"Correctness\" : 6.027456183070403\n}";
+            // string exampleJson = null;
+            // exampleJson = "{\n  \"GoodPinningPractice\" : 2.3021358869347655,\n  \"NetScore\" : 9.301444243932576,\n  \"PullRequest\" : 7.061401241503109,\n  \"ResponsiveMaintainer\" : 5.962133916683182,\n  \"LicenseScore\" : 5.637376656633329,\n  \"RampUp\" : 1.4658129805029452,\n  \"BusFactor\" : 0.8008281904610115,\n  \"Correctness\" : 6.027456183070403\n}";
 
-            var example = exampleJson != null
-            ? JsonConvert.DeserializeObject<PackageRating>(exampleJson)
-            : default(PackageRating);            //TODO: Change the data returned
-            return new ObjectResult(example);
+            // var example = exampleJson != null
+            // ? JsonConvert.DeserializeObject<PackageRating>(exampleJson)
+            // : default(PackageRating);            //TODO: Change the data returned
+            // return new ObjectResult(example);
         }
 
         /// <summary>
@@ -561,7 +630,7 @@ namespace PackageRegistry.Controllers
             }
 
             code = 200;
-            Program.LogDebug("Response: PUT /package/{id}\n" + "response: " + code + "\nSuccessfully deleted." + "\nid: " + id);
+            Program.LogDebug("Response: PUT /package/{id}\n" + "response: " + code + "\nSuccessfully updated." + "\nid: " + id);
             return StatusCode(code);
             //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..),-...
             // return StatusCode(200);
