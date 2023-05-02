@@ -427,9 +427,9 @@ namespace PackageRegistry.Controllers
             }
             catch (System.Exception e)
             {
-                code = 400;
+                code = 0;
                 Program.LogDebug("Response: GET /package/{id}\n" + "response: " + code + "\nCould not check exists." + "\nid: " + id + "\nexception: " + e.ToString());
-                return StatusCode(code);
+                return StatusCode(code, new Error(code, "Could not check if the package exists."));
             }
 
             if (!exists)
@@ -446,9 +446,9 @@ namespace PackageRegistry.Controllers
             }
             catch (System.Exception e)
             {
-                code = 400;
+                code = 0;
                 Program.LogDebug("Response: GET /package/{id}\n" + "response: " + code + "\nCould not get from database." + "\nid: " + id + "\nexception: " + e.ToString());
-                return StatusCode(code);
+                return StatusCode(code, new Error(code, "nCould not get package from database."));
             }
 
             code = 200;
@@ -489,12 +489,80 @@ namespace PackageRegistry.Controllers
         [Route("/package/{id}")]
         [ValidateModelState]
         [SwaggerOperation("PackageUpdate")]
-        public virtual IActionResult PackageUpdate([FromBody] Package body, [FromHeader] string xAuthorization, [FromRoute][Required] string id)
+        public async virtual Task<IActionResult> PackageUpdate([FromBody] Package body, [FromHeader] string xAuthorization, [FromRoute][Required] string id)
         {
-            Program.LogDebug("Request: PUT /package/{id}\n" + body.ToString() + "\nid: " + id);
+            Program.LogDebug("Request: PUT /package/{id}\n" + "id: " + id + "\nbody: " + body.ToString());
 
-            ActionResult response;
+            int code;
 
+            Package package = null;
+            if (!string.IsNullOrWhiteSpace(body.Data.Content) && string.IsNullOrWhiteSpace(body.Data.URL))
+            {
+                try
+                {
+                    package = await Package.CreateFromContent(body.Data.Content);
+                }
+                catch (System.Exception e)
+                {
+                    code = 400;
+                    Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nFailed to create package from content." + "\nexception: " + e.ToString());
+                    return StatusCode(code);
+                }
+            }
+            else if (!string.IsNullOrWhiteSpace(body.Data.URL) && string.IsNullOrWhiteSpace(body.Data.Content))
+            {
+                try
+                {
+                    package = await Package.CreateFromURL(body.Data.URL);
+                }
+                catch (System.Exception e)
+                {
+                    code = 400;
+                    Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nFailed to create package from URL." + "\nexception: " + e.ToString());
+                    return StatusCode(code);
+                }
+            }
+            else
+            {
+                code = 400;
+                Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nInvalid request format.");
+                return StatusCode(code);
+            }
+
+
+            bool exists = false;
+            try
+            {
+                exists = await Program.db.ExistsInPackageTable(body.Metadata);
+            }
+            catch (System.Exception e)
+            {
+                code = 400;
+                Program.LogDebug("Response: PUT /package/{id}\n" + "response: " + code + "\nCould not check exists." + "\nid: " + id + "\nexception: " + e.ToString());
+                return StatusCode(code);
+            }
+
+            if (!exists)
+            {
+                code = 404;
+                Program.LogDebug("Response: PUT /package/{id}\n" + "response: " + code + "\nPackage does not exist." + "\nid: " + id);
+                return StatusCode(code);
+            }
+
+            try
+            {
+                await Program.db.UpdatePackageTable(Int32.Parse(id), body.Data);
+            }
+            catch (System.Exception e)
+            {
+                code = 400;
+                Program.LogDebug("Response: PUT /package/{id}\n" + "response: " + code + "\nCould not update database." + "\nid: " + id + "\nexception: " + e.ToString());
+                return StatusCode(code);
+            }
+
+            code = 200;
+            Program.LogDebug("Response: PUT /package/{id}\n" + "response: " + code + "\nSuccessfully deleted." + "\nid: " + id);
+            return StatusCode(code);
             //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..),-...
             // return StatusCode(200);
 

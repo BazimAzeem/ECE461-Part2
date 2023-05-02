@@ -88,6 +88,22 @@ namespace PackageRegistry
             return rows.Count == 0 ? false : true;
         }
 
+        public async Task<bool> ExistsInPackageTable(PackageMetadata metadata)
+        {
+            var columns = new List<string> { "id" };
+            Version version = new Version(metadata.Version);
+            var where = new Dictionary<string, string> {
+                { "id", metadata.ID},
+                { "name", metadata.Name},
+                {"version_major" , version.Major.ToString()},
+                {"version_minor" , version.Minor.ToString()},
+                {"version_patch" , version.Patch.ToString()},
+            };
+            var rows = await this.packageTable.Select(columns, where);
+            return rows.Count == 0 ? false : true;
+        }
+
+
         public async Task<int> InsertIntoPackageTable(Package package)
         {
             Version v = new Version(package.Metadata.Version);
@@ -105,6 +121,12 @@ namespace PackageRegistry
             int id = await this.packageTable.Insert(item);
             return id;
         }
+
+        public async Task UpdatePackageTable(int id, PackageData data)
+        {
+            throw new System.Exception();
+        }
+
 
         public async Task ResetPackageTable()
         {

@@ -42,6 +42,12 @@ namespace PackageRegistry.Models
         [DataMember(Name = "message")]
         public string Message { get; set; }
 
+        public Error(int code, string msg)
+        {
+            this.Code = code;
+            this.Message = msg;
+        }
+
         /// <summary>
         /// Returns the string presentation of the object
         /// </summary>

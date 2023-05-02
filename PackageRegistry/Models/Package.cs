@@ -102,13 +102,19 @@ namespace PackageRegistry.Models
             Byte[] bytes = Convert.FromBase64String(content);
             MemoryStream mem = new MemoryStream(bytes);
             ZipArchive zip = new ZipArchive(mem);
+
             ZipArchiveEntry packageJsonEntry = null;
+            int highestLevel = Int32.MaxValue;
             foreach (ZipArchiveEntry entry in zip.Entries)
             {
                 if (entry.Name == "package.json")
                 {
-                    packageJsonEntry = zip.GetEntry(entry.FullName);
-                    break;
+                    int level = entry.FullName.Count(f => f == '/');
+                    if (level < highestLevel)
+                    {
+                        highestLevel = level;
+                        packageJsonEntry = zip.GetEntry(entry.FullName);
+                    }
                 }
             }
             StreamReader packageJsonReader = new StreamReader(packageJsonEntry.Open());
