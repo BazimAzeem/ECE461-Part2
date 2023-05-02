@@ -164,7 +164,7 @@ namespace PackageRegistry.Controllers
         [SwaggerResponse(statusCode: 200, type: typeof(List<PackageMetadata>), description: "Return a list of packages.")]
         public async virtual Task<IActionResult> PackageByRegExGet([FromBody] string body, [FromHeader] string xAuthorization, [FromRoute][Required] string regex)
         {
-            Program.LogDebug("Request: POST /package/byRegex/{regex}\n" + body.ToString() + "regex: " + regex.ToString());
+            Program.LogDebug("Request: PUT/package/{id}/byRegex/{regex}\n" + body.ToString() + "regex: " + regex.ToString());
 
             int code;
 
@@ -204,7 +204,7 @@ namespace PackageRegistry.Controllers
         public async virtual Task<IActionResult> PackageCreate([FromBody] PackageData body, [FromHeader] string xAuthorization)
         {
 #if !NO_GCP
-            Program.LogDebug("Request: POST /package\n" + body.ToString());
+            Program.LogDebug("Request: PUT/package/{id}\n" + body.ToString());
 
             int code;
             Package package;
@@ -217,7 +217,7 @@ namespace PackageRegistry.Controllers
                 catch (System.Exception e)
                 {
                     code = 400;
-                    Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nFailed to create package from content." + "\nexception: " + e.ToString());
+                    Program.LogDebug("Response: PUT/package/{id}\n" + "response: " + code + "\nFailed to create package from content." + "\nexception: " + e.ToString());
                     return StatusCode(code);
                 }
             }
@@ -230,14 +230,14 @@ namespace PackageRegistry.Controllers
                 catch (System.Exception e)
                 {
                     code = 400;
-                    Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nFailed to create package from URL." + "\nexception: " + e.ToString());
+                    Program.LogDebug("Response: PUT/package/{id}\n" + "response: " + code + "\nFailed to create package from URL." + "\nexception: " + e.ToString());
                     return StatusCode(code);
                 }
             }
             else
             {
                 code = 400;
-                Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nInvalid request format.");
+                Program.LogDebug("Response: PUT/package/{id}\n" + "response: " + code + "\nInvalid request format.");
                 return StatusCode(code);
             }
             package.Data.JSProgram = body.JSProgram;
@@ -250,14 +250,14 @@ namespace PackageRegistry.Controllers
             catch (System.Exception e)
             {
                 code = 400;
-                Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nFailed to calculate metrics." + "\nexception: " + e.ToString());
+                Program.LogDebug("Response: PUT/package/{id}\n" + "response: " + code + "\nFailed to calculate metrics." + "\nexception: " + e.ToString());
                 return StatusCode(code);
             }
 
             if (mc.Calculate() < 0)
             {
                 code = 424;
-                Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nScore is too low" + "\nmetrics: " + mc.ToString());
+                Program.LogDebug("Response: PUT/package/{id}\n" + "response: " + code + "\nScore is too low" + "\nmetrics: " + mc.ToString());
                 return StatusCode(code);
             }
 
@@ -271,26 +271,26 @@ namespace PackageRegistry.Controllers
                 if (e.SqlState == Npgsql.PostgresErrorCodes.UniqueViolation)
                 {
                     code = 409;
-                    Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nPackage already exists.");
+                    Program.LogDebug("Response: PUT/package/{id}\n" + "response: " + code + "\nPackage already exists.");
                     return StatusCode(code);
                 }
                 else
                 {
                     code = 400;
-                    Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nFailed to insert package into database. Unexpected PostgreSQL error." + "\nexception: " + e.ToString());
+                    Program.LogDebug("Response: PUT/package/{id}\n" + "response: " + code + "\nFailed to insert package into database. Unexpected PostgreSQL error." + "\nexception: " + e.ToString());
                     return StatusCode(code);
                 }
             }
             catch (System.Exception e)
             {
                 code = 400;
-                Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nFailed to insert package into database." + "\nexception: " + e.ToString());
+                Program.LogDebug("Response: PUT/package/{id}\n" + "response: " + code + "\nFailed to insert package into database." + "\nexception: " + e.ToString());
                 return StatusCode(code);
             }
             package.Metadata.ID = id.ToString();
 
             code = 201;
-            Program.LogDebug("Response: POST /package\n" + "response: " + code + "\npackage: " + package.ToString());
+            Program.LogDebug("Response: PUT/package/{id}\n" + "response: " + code + "\npackage: " + package.ToString());
             return StatusCode(code, package);
 
             // string exampleJson = null;
@@ -505,7 +505,7 @@ namespace PackageRegistry.Controllers
                 catch (System.Exception e)
                 {
                     code = 400;
-                    Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nFailed to create package from content." + "\nexception: " + e.ToString());
+                    Program.LogDebug("Response: PUT /package/{id}\n" + "response: " + code + "\nFailed to create package from content." + "\nexception: " + e.ToString());
                     return StatusCode(code);
                 }
             }
@@ -518,16 +518,17 @@ namespace PackageRegistry.Controllers
                 catch (System.Exception e)
                 {
                     code = 400;
-                    Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nFailed to create package from URL." + "\nexception: " + e.ToString());
+                    Program.LogDebug("Response: PUT /package/{id}\n" + "response: " + code + "\nFailed to create package from URL." + "\nexception: " + e.ToString());
                     return StatusCode(code);
                 }
             }
             else
             {
                 code = 400;
-                Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nInvalid request format.");
+                Program.LogDebug("Response: PUT /package/{id}\n" + "response: " + code + "\nInvalid request format.");
                 return StatusCode(code);
             }
+            package.Data.JSProgram = body.Data.JSProgram;
 
             bool exists = false;
             try
@@ -593,7 +594,7 @@ namespace PackageRegistry.Controllers
         [SwaggerResponse(statusCode: 0, type: typeof(Error), description: "unexpected error")]
         public virtual IActionResult PackagesList([FromBody] List<PackageQuery> body, [FromHeader] string xAuthorization, [FromQuery] string offset)
         {
-            Program.LogDebug("Request: POST /packages\n" + body.ToString() + "\noffset: " + offset);
+            Program.LogDebug("Request: PUT/package/{id}s\n" + body.ToString() + "\noffset: " + offset);
 
             ActionResult response;
 

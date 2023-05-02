@@ -81,9 +81,18 @@ namespace PackageRegistry
             return (int)id;
         }
 
-        public async void Update(List<String> columns, Dictionary<String, String> where = null)
+        public async Task Update(Dictionary<String, String> set, Dictionary<String, String> where = null)
         {
+            String setStr = String.Join(", ", where.Select(x => x.Key + "=" + x.Value).ToArray());
+            String query = String.Format("UPDATE {0} SET {1}", this.name, setStr);
+            if (where != null)
+            {
+                String whereStr = String.Join(" AND ", where.Select(x => x.Key + "=" + x.Value).ToArray());
+                query += " WHERE " + whereStr;
+            }
 
+            using var command = this.dataSource.CreateCommand(query);
+            await command.ExecuteNonQueryAsync();
         }
 
         public async Task Delete(Dictionary<String, String> where = null)

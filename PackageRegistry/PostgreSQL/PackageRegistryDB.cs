@@ -124,7 +124,13 @@ namespace PackageRegistry
 
         public async Task UpdatePackageTable(int id, PackageData data)
         {
-            throw new System.Exception();
+            var set = new Dictionary<string, string> {
+                {"content", data.Content},
+                {"url", data.URL},
+                {"js_program", data.JSProgram}
+            };
+            var where = new Dictionary<string, string> { { "id", id.ToString() } };
+            await this.packageTable.Update(set, where);
         }
 
 
