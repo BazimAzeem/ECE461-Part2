@@ -87,16 +87,18 @@ namespace PackageRegistry.Controllers
         {
             Program.LogDebug("Request: DELETE /package/byName/{name}\n" + "name: " + name.ToString());
 
-            ActionResult response;
+            int code;
 
             //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..),-...
             // return StatusCode(200);
 
             //TODO: Uncomment the next line to return response 400 or use other options such as return this.NotFound(), return this.BadRequest(..),-...
-            // return StatusCode(400);
+            code = 400;
+            Program.LogDebug("Response: DELETE /package/byName/{name}\n" + "response: " + code + "\nNot implemented." + "name: " + name.ToString());
+            return StatusCode(code);
 
             //TODO: Uncomment the next line to return response 404 or use other options such as return this.NotFound(), return this.BadRequest(..),-...
-            return StatusCode(404);
+            // return StatusCode(404);
 
             throw new NotImplementedException();
         }
@@ -121,16 +123,18 @@ namespace PackageRegistry.Controllers
         {
             Program.LogDebug("Request: GET /package/byName/{name}\n" + "name: " + name.ToString());
 
-            ActionResult response;
+            int code;
 
             //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..),-...
             // return StatusCode(200, default(List<PackageHistoryEntry>));
 
             //TODO: Uncomment the next line to return response 400 or use other options such as return this.NotFound(), return this.BadRequest(..),-...
-            // return StatusCode(400);
+            code = 400;
+            Program.LogDebug("Response: GET /package/byName/{name}\n" + "response: " + code + "\nNot implemented." + "name: " + name.ToString());
+            return StatusCode(code);
 
             //TODO: Uncomment the next line to return response 404 or use other options such as return this.NotFound(), return this.BadRequest(..),-...
-            return StatusCode(404);
+            // return StatusCode(404);
 
             //TODO: Uncomment the next line to return response 0 or use other options such as return this.NotFound(), return this.BadRequest(..),-...
             // return StatusCode(0, default(Error));
@@ -160,15 +164,17 @@ namespace PackageRegistry.Controllers
         [SwaggerResponse(statusCode: 200, type: typeof(List<PackageMetadata>), description: "Return a list of packages.")]
         public async virtual Task<IActionResult> PackageByRegExGet([FromBody] string body, [FromHeader] string xAuthorization, [FromRoute][Required] string regex)
         {
-            Program.LogDebug("Request: POST /package/byRegex/{regex}\n" + body.ToString() + "\nregex: " + regex.ToString());
+            Program.LogDebug("Request: POST /package/byRegex/{regex}\n" + body.ToString() + "regex: " + regex.ToString());
 
-            ActionResult response;
+            int code;
 
             //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..),-...
             // return StatusCode(200, default(List<PackageMetadata>));
 
             //TODO: Uncomment the next line to return response 400 or use other options such as return this.NotFound(), return this.BadRequest(..),-...
-            // return StatusCode(400);
+            code = 400;
+            Program.LogDebug("Response: GET /package/byRegex/{regex}\n" + "response: " + code + "\nNot implemented." + "regex: " + regex.ToString());
+            return StatusCode(code);
 
             //TODO: Uncomment the next line to return response 404 or use other options such as return this.NotFound(), return this.BadRequest(..),-...
             // return StatusCode(404);
@@ -247,7 +253,7 @@ namespace PackageRegistry.Controllers
                 return StatusCode(code);
             }
 
-            if (mc.Calculate() < 0.5)
+            if (mc.Calculate() < 0)
             {
                 code = 424;
                 Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nScore is too low" + "\nmetrics: " + mc.ToString());
@@ -257,7 +263,7 @@ namespace PackageRegistry.Controllers
             int id = 0;
             try
             {
-                id = await Program.db.InsertIntoPackage(package);
+                id = await Program.db.InsertIntoPackageTable(package);
             }
             catch (Npgsql.PostgresException e)
             {
@@ -265,6 +271,12 @@ namespace PackageRegistry.Controllers
                 {
                     code = 409;
                     Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nPackage already exists.");
+                    return StatusCode(code);
+                }
+                else
+                {
+                    code = 400;
+                    Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nFailed to insert package into database. Unexpected PostgreSQL error.");
                     return StatusCode(code);
                 }
             }
@@ -301,11 +313,27 @@ namespace PackageRegistry.Controllers
         [Route("/package/{id}")]
         [ValidateModelState]
         [SwaggerOperation("PackageDelete")]
-        public virtual IActionResult PackageDelete([FromHeader] string xAuthorization, [FromRoute][Required] string id)
+        public async virtual Task<IActionResult> PackageDelete([FromHeader] string xAuthorization, [FromRoute][Required] string id)
         {
             Program.LogDebug("Request: DELETE /package/{id}\n" + "id: " + id);
 
-            ActionResult response;
+            int code;
+            code = 400;
+
+            // try
+            // {
+            //     await Program.db.DeleteFromPackageTable(Int32.Parse(id));
+            //     code = 200;
+            // }
+            // catch (System.Exception)
+            // {
+            //     code = 400;
+            // }
+
+            Program.LogDebug("Response: DELETE /reset\n" + "response: " + code);
+
+
+            return StatusCode(code);
 
             //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..),-...
             // return StatusCode(200);
@@ -496,7 +524,7 @@ namespace PackageRegistry.Controllers
 
             try
             {
-                await Program.db.packageTable.Delete();
+                await Program.db.ResetPackageTable();
                 code = 200;
             }
             catch (System.Exception)
@@ -508,6 +536,12 @@ namespace PackageRegistry.Controllers
 
 
             return StatusCode(code);
+
+            //TODO: Uncomment the next line to return response 400 or use other options such as return this.NotFound(), return this.BadRequest(..),-...
+            // return StatusCode(400);
+
+            //TODO: Uncomment the next line to return response 400 or use other options such as return this.NotFound(), return this.BadRequest(..),-...
+            // return StatusCode(401);
         }
     }
 }

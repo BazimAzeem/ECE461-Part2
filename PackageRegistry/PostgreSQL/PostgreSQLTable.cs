@@ -63,7 +63,7 @@ namespace PackageRegistry
             String query = String.Format("DELETE FROM {0}", this.name);
             if (where != null)
             {
-                String whereStr = String.Join(" AND ", this.schema.Select(x => x.Key + "=" + x.Value).ToArray());
+                String whereStr = String.Join(" AND ", where.Select(x => x.Key + "=" + x.Value).ToArray());
                 query += " WHERE " + whereStr;
             }
 

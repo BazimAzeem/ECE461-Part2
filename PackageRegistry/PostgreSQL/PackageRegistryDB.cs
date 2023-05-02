@@ -82,7 +82,7 @@ namespace PackageRegistry
         //     }
         // }
 
-        public async Task<int> InsertIntoPackage(Package package)
+        public async Task<int> InsertIntoPackageTable(Package package)
         {
             Version v = new Version(package.Metadata.Version);
 
@@ -100,28 +100,15 @@ namespace PackageRegistry
             return id;
         }
 
-        // // Delete all from package table
-        // public async Task DeleteFromPackage()
-        // {
-        //     await using var command = this.dataSource.CreateCommand("DELETE FROM package");
-        //     await command.ExecuteNonQueryAsync();
-        // }
+        public async Task ResetPackageTable()
+        {
+            await this.packageTable.Delete();
+        }
 
-        // // Delete package with given id
-        // public async Task DeleteFromPackage(int id)
-        // {
-        //     var connection = await this.dataSource.OpenConnectionAsync();
-        //     await using var command = new NpgsqlCommand("DELETE FROM package WHERE id=($1)", connection)
-        //     {
-        //         Parameters =
-        //         {
-        //             new() { Value = id.ToString() },
-        //         }
-        //     };
-
-        //     await command.ExecuteNonQueryAsync();
-        // }
-
-
+        public async Task DeleteFromPackageTable(int id)
+        {
+            var where = new Dictionary<string, string> { { "id", id.ToString() } };
+            await this.packageTable.Delete(where);
+        }
     }
 }

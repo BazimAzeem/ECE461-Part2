@@ -601,7 +601,7 @@ namespace PackageRegistry.MetricsCalculation
                     int dependencyCount = 0, numNotPinned = 0;
                     foreach (var dependency in dependencies.EnumerateObject())
                     {
-                        // Program.LogDebug($"{dependency.Name}: {dependency.Value.GetString()}");
+                        Program.LogDebug($"{dependency.Name}: {dependency.Value.GetString()}");
                         dependencyCount++;
                         if (dependency.Value.GetString().Contains("^") || dependency.Value.GetString().Contains("~") || dependency.Value.GetString().Contains("*") || dependency.Value.GetString().Contains("x"))
                         {
