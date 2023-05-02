@@ -82,6 +82,14 @@ namespace PackageRegistry
         //     }
         // }
 
+        public async Task<bool> ExistsInPackageTable(int id)
+        {
+            var columns = new List<string> { "id" };
+            var where = new Dictionary<string, string> { { "id", id.ToString() } };
+            var rows = await this.packageTable.Select(columns, where);
+            return rows.Count == 0 ? false : true;
+        }
+
         public async Task<int> InsertIntoPackageTable(Package package)
         {
             Version v = new Version(package.Metadata.Version);
@@ -93,7 +101,7 @@ namespace PackageRegistry
             {"version_patch", v.Patch.ToString()},
             // {"content", "'"+package.Data.Content+"'"},
             {"url", "'"+package.Data.URL+"'"},
-            {"js_program", "'"+package.Data.JSProgram+"'"},
+            {"js_program", "'"+package.Data.JSProgram.Replace("'", "''")+"'"},
         };
 
             int id = await this.packageTable.Insert(item);

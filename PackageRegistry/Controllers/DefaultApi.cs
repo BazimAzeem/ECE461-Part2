@@ -213,10 +213,10 @@ namespace PackageRegistry.Controllers
                 {
                     package = await Package.CreateFromContent(body.Content);
                 }
-                catch (System.Exception)
+                catch (System.Exception e)
                 {
                     code = 400;
-                    Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nFailed to create package from content.");
+                    Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nFailed to create package from content." + "\nexception: " + e.ToString());
                     return StatusCode(code);
                 }
             }
@@ -226,10 +226,10 @@ namespace PackageRegistry.Controllers
                 {
                     package = await Package.CreateFromURL(body.URL);
                 }
-                catch (System.Exception)
+                catch (System.Exception e)
                 {
                     code = 400;
-                    Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nFailed to create package from URL.");
+                    Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nFailed to create package from URL." + "\nexception: " + e.ToString());
                     return StatusCode(code);
                 }
             }
@@ -246,10 +246,10 @@ namespace PackageRegistry.Controllers
             {
                 mc = new MetricsCalculator(package.Data.URL);
             }
-            catch (System.Exception)
+            catch (System.Exception e)
             {
                 code = 400;
-                Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nFailed to calculate metrics.");
+                Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nFailed to calculate metrics." + "\nexception: " + e.ToString());
                 return StatusCode(code);
             }
 
@@ -276,14 +276,14 @@ namespace PackageRegistry.Controllers
                 else
                 {
                     code = 400;
-                    Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nFailed to insert package into database. Unexpected PostgreSQL error.");
+                    Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nFailed to insert package into database. Unexpected PostgreSQL error." + "\nexception: " + e.ToString());
                     return StatusCode(code);
                 }
             }
-            catch (System.Exception)
+            catch (System.Exception e)
             {
                 code = 400;
-                Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nFailed to insert package into database.");
+                Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nFailed to insert package into database." + "\nexception: " + e.ToString());
                 return StatusCode(code);
             }
             package.Metadata.ID = id.ToString();
@@ -318,33 +318,40 @@ namespace PackageRegistry.Controllers
             Program.LogDebug("Request: DELETE /package/{id}\n" + "id: " + id);
 
             int code;
-            code = 400;
 
-            // try
-            // {
-            //     await Program.db.DeleteFromPackageTable(Int32.Parse(id));
-            //     code = 200;
-            // }
-            // catch (System.Exception)
-            // {
-            //     code = 400;
-            // }
+            bool exists = false;
+            try
+            {
+                exists = await Program.db.ExistsInPackageTable(Int32.Parse(id));
+            }
+            catch (System.Exception e)
+            {
+                code = 400;
+                Program.LogDebug("Response: DELETE /package/{id}\n" + "response: " + code + "\nCould not check exists." + "\nid: " + id + "\nexception: " + e.ToString());
+                return StatusCode(code);
+            }
 
-            Program.LogDebug("Response: DELETE /reset\n" + "response: " + code);
+            if (!exists)
+            {
+                code = 404;
+                Program.LogDebug("Response: DELETE /package/{id}\n" + "response: " + code + "\nPackage does not exist." + "\nid: " + id);
+                return StatusCode(code);
+            }
 
+            try
+            {
+                await Program.db.DeleteFromPackageTable(Int32.Parse(id));
+            }
+            catch (System.Exception e)
+            {
+                code = 400;
+                Program.LogDebug("Response: DELETE /package/{id}\n" + "response: " + code + "\nCould not delete from database." + "\nid: " + id + "\nexception: " + e.ToString());
+                return StatusCode(code);
+            }
 
+            code = 200;
+            Program.LogDebug("Response: DELETE /package/{id}\n" + "response: " + code + "\nSuccessfully deleted." + "\nid: " + id);
             return StatusCode(code);
-
-            //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..),-...
-            // return StatusCode(200);
-
-            //TODO: Uncomment the next line to return response 400 or use other options such as return this.NotFound(), return this.BadRequest(..),-...
-            // return StatusCode(400);
-
-            //TODO: Uncomment the next line to return response 404 or use other options such as return this.NotFound(), return this.BadRequest(..),-...
-            // return StatusCode(404);
-
-            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -403,11 +410,46 @@ namespace PackageRegistry.Controllers
         [SwaggerOperation("PackageRetrieve")]
         [SwaggerResponse(statusCode: 200, type: typeof(Package), description: "Return the package.")]
         [SwaggerResponse(statusCode: 0, type: typeof(Error), description: "unexpected error")]
-        public virtual IActionResult PackageRetrieve([FromHeader] string xAuthorization, [FromRoute][Required] string id)
+        public async virtual Task<IActionResult> PackageRetrieve([FromHeader] string xAuthorization, [FromRoute][Required] string id)
         {
-            Program.LogDebug("Request: GET /package/{id}\n" + "id: " + id);
+            Program.LogDebug("Request: DELETE /package/{id}\n" + "id: " + id);
 
-            ActionResult response;
+            int code;
+
+            bool exists = false;
+            try
+            {
+                exists = await Program.db.ExistsInPackageTable(Int32.Parse(id));
+            }
+            catch (System.Exception e)
+            {
+                code = 400;
+                Program.LogDebug("Response: DELETE /package/{id}\n" + "response: " + code + "\nCould not check exists." + "\nid: " + id + "\nexception: " + e.ToString());
+                return StatusCode(code);
+            }
+
+            if (!exists)
+            {
+                code = 404;
+                Program.LogDebug("Response: DELETE /package/{id}\n" + "response: " + code + "\nPackage does not exist." + "\nid: " + id);
+                return StatusCode(code);
+            }
+
+            Package package = null;
+            try
+            {
+                await Program.db.DeleteFromPackageTable(Int32.Parse(id));
+            }
+            catch (System.Exception e)
+            {
+                code = 400;
+                Program.LogDebug("Response: DELETE /package/{id}\n" + "response: " + code + "\nCould not delete from database." + "\nid: " + id + "\nexception: " + e.ToString());
+                return StatusCode(code);
+            }
+
+            code = 200;
+            Program.LogDebug("Response: DELETE /package/{id}\n" + "response: " + code + "\nSuccessfully deleted." + "\nid: " + id);
+            return StatusCode(code);
 
             //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..),-...
             // return StatusCode(200, default(Package));
@@ -525,18 +567,17 @@ namespace PackageRegistry.Controllers
             try
             {
                 await Program.db.ResetPackageTable();
-                code = 200;
             }
-            catch (System.Exception)
+            catch (System.Exception e)
             {
                 code = 400;
+                Program.LogDebug("Response: DELETE /reset\n" + "response: " + code + "\nexception: " + e.ToString());
+                return StatusCode(code);
             }
 
+            code = 200;
             Program.LogDebug("Response: DELETE /reset\n" + "response: " + code);
-
-
             return StatusCode(code);
-
             //TODO: Uncomment the next line to return response 400 or use other options such as return this.NotFound(), return this.BadRequest(..),-...
             // return StatusCode(400);
 

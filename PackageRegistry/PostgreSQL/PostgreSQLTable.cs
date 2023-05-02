@@ -36,9 +36,32 @@ namespace PackageRegistry
             command.ExecuteNonQuery();
         }
 
-        public async void Select(List<String> columns, Dictionary<String, String> where = null)
+        public async Task<List<Dictionary<string, object>>> Select(List<String> columns, Dictionary<String, String> where = null)
         {
+            String columnsStr = String.Join(", ", columns);
+            String query = String.Format("SELECT {0} FROM {1}", columnsStr, this.name);
+            if (where != null)
+            {
+                String whereStr = String.Join(" AND ", where.Select(x => x.Key + "=" + x.Value).ToArray());
+                query += " WHERE " + whereStr;
+            }
 
+            using var command = this.dataSource.CreateCommand(query);
+            await using var reader = await command.ExecuteReaderAsync();
+
+            // Convert from [val1, val2, val3] to { col1: val1, col2: val2, col3: val3 }
+            var rows = new List<Dictionary<string, object>> { };
+            while (await reader.ReadAsync())
+            {
+                var row = new Dictionary<string, object> { };
+                for (int i = 0; i < reader.FieldCount; i++)
+                {
+                    row.Add(columns[i], reader.GetValue(i));
+                }
+                rows.Add(row);
+            }
+
+            return rows;
         }
 
         public async Task<int> Insert(Dictionary<String, String> item)
