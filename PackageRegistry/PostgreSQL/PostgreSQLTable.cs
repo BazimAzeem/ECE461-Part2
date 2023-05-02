@@ -38,7 +38,12 @@ namespace PackageRegistry
 
         public async Task<List<Dictionary<string, object>>> Select(List<String> columns, Dictionary<String, String> where = null)
         {
-            String columnsStr = String.Join(", ", columns);
+            String columnsStr;
+            if (columns.Count == 0)
+                columnsStr = "*";
+            else
+                columnsStr = String.Join(", ", columns);
+
             String query = String.Format("SELECT {0} FROM {1}", columnsStr, this.name);
             if (where != null)
             {

@@ -334,7 +334,7 @@ namespace PackageRegistry.MetricsCalculation
     }
     public class LicenseScore : Metric
     {
-        
+
         /// The list of compatible licenses with this project
         string[] compatibleLicenses = { "mit", "lgpl 2.1", "lgpl 2.1+", "bsd", "bsd-new", "x11", "public domain" };
 
@@ -363,25 +363,26 @@ namespace PackageRegistry.MetricsCalculation
                     return;
                 }
 
-                
-               
+
+
 
                 // get license + readme file
                 string owner = this.parentLibrary.owner;
                 string repo = this.parentLibrary.name;
-               
+
                 httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("my-cool-cli", "1.0"));
                 httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
-                
+
                 string content = "";
                 JsonElement contentObj;
                 byte[] contentBytes;
-                
+
 
                 // Send the GET request to retrieve the contents of the package.json file
                 var response = await httpClient.GetAsync($"https://api.github.com/repos/{owner}/{repo}/contents/LICENSE");
                 string responseString = await response.Content.ReadAsStringAsync();
-                if (! responseString.Contains("Not Found") ) {
+                if (!responseString.Contains("Not Found"))
+                {
                     contentObj = JsonSerializer.Deserialize<JsonElement>(responseString);
                     contentBytes = Convert.FromBase64String(contentObj.GetProperty("content").GetString());
                     content += Encoding.UTF8.GetString(contentBytes);
@@ -389,7 +390,8 @@ namespace PackageRegistry.MetricsCalculation
 
                 response = await httpClient.GetAsync($"https://api.github.com/repos/{owner}/{repo}/contents/README.md");
                 responseString = await response.Content.ReadAsStringAsync();
-                if (! responseString.Contains("Not Found") ) {
+                if (!responseString.Contains("Not Found"))
+                {
                     contentObj = JsonSerializer.Deserialize<JsonElement>(responseString);
                     contentBytes = Convert.FromBase64String(contentObj.GetProperty("content").GetString());
                     content += Encoding.UTF8.GetString(contentBytes);
@@ -397,7 +399,7 @@ namespace PackageRegistry.MetricsCalculation
 
                 string[] licensefilelines = content.Split("\n");
 
-                
+
 
                 List<string> licenseLines = new List<string>();
 
@@ -431,7 +433,7 @@ namespace PackageRegistry.MetricsCalculation
                         {
                             if (line.Contains(license))
                             {
-                                parentLibrary.LogDebug("found incompatible license: " + license+ " for " + owner + "/" + repo);
+                                parentLibrary.LogDebug("found incompatible license: " + license + " for " + owner + "/" + repo);
                                 score -= 0.5F;
                             }
                         }
@@ -620,12 +622,13 @@ namespace PackageRegistry.MetricsCalculation
                     var packageJson = JsonSerializer.Deserialize<JsonElement>(content);
 
                     int dependencyCount = 0, numNotPinned = 0;
-                    try {
+                    try
+                    {
                         System.Text.Json.JsonElement dependencies = packageJson.GetProperty("dependencies");
 
                         // Print the dependencies and their versions
                         // parentLibrary.LogDebug("Dependencies:");
-                        
+
                         foreach (var dependency in dependencies.EnumerateObject())
                         {
                             // parentLibrary.LogDebug($"{dependency.Name}: {dependency.Value.GetString()}");
@@ -638,16 +641,19 @@ namespace PackageRegistry.MetricsCalculation
                                 numNotPinned++;
                             }
                         }
-                    }catch(KeyNotFoundException e) {
+                    }
+                    catch (KeyNotFoundException e)
+                    {
                         parentLibrary.LogInfo($"no dependancies found in {owner}/{repo}");
                     } // move on if the package.json doesn't have a dependancies section
 
-                    try {
+                    try
+                    {
                         System.Text.Json.JsonElement dev_dependencies = packageJson.GetProperty("devDependencies");
 
                         // Print the dependencies and their versions
                         // parentLibrary.LogDebug("Dependencies:");
-                       
+
                         foreach (var dependency in dev_dependencies.EnumerateObject())
                         {
                             // parentLibrary.LogDebug($"{dependency.Name}: {dependency.Value.GetString()}");
@@ -660,7 +666,9 @@ namespace PackageRegistry.MetricsCalculation
                                 numNotPinned++;
                             }
                         }
-                    }catch(KeyNotFoundException e) {
+                    }
+                    catch (KeyNotFoundException e)
+                    {
                         parentLibrary.LogInfo($"no dev dependancies found in {owner}/{repo}");
                     } // move on if the package.json doesn't have a dev_dependancies section
 

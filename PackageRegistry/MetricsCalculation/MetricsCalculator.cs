@@ -9,7 +9,7 @@ using PackageRegistry.Models;
 namespace PackageRegistry.MetricsCalculation
 {
     public class MetricsCalculator
-    {   
+    {
         const short ERROR_SUCCESS = 0;
         const short ERROR_WARNING = 1;
         const short ERROR_ERROR = 2;
@@ -119,29 +119,35 @@ namespace PackageRegistry.MetricsCalculation
 
             return this.score;
         }
-        
 
-        public void LogDebug(string message) {
+
+        public void LogDebug(string message)
+        {
             Program.LogDebug(message);
         }
-        public void LogInfo(string message) {
+        public void LogInfo(string message)
+        {
             Program.LogInfo(message);
         }
-        public void LogError(string message) {
-            if (error_level <= ERROR_ERROR) {
+        public void LogError(string message)
+        {
+            if (error_level <= ERROR_ERROR)
+            {
                 error_message = message;
                 error_level = ERROR_ERROR;
             }
             Program.LogError(message);
         }
 
-        public void LogWarning(string message) {
-            if (error_level <= ERROR_WARNING) {
+        public void LogWarning(string message)
+        {
+            if (error_level <= ERROR_WARNING)
+            {
                 error_message = message;
                 error_level = ERROR_WARNING;
             }
             Program.LogWarning(message);
         }
     }
-    
+
 }

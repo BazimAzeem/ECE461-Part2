@@ -64,23 +64,21 @@ namespace PackageRegistry
         //     }
         // }
 
-        // // Select package with given id
-        // // TODO
-        // public async Task SelectFromPackage(int id)
-        // {
-        //     await using var command = this.dataSource.CreateCommand("SELECT * FROM package");
-        //     await using var reader = await command.ExecuteReaderAsync();
+        public async Task<Package> SelectFromPackage(int id)
+        {
+            var columns = new List<string> { "id", "name", "version_major", "version_minor", "version_patch", "content", "url", "js_program" };
+            var where = new Dictionary<string, string> { { "id", id.ToString() } };
+            var rows = await this.packageTable.Select(columns, where);
 
-        //     while (await reader.ReadAsync())
-        //     {
-        //         object[] row = new object[reader.FieldCount];
-        //         Console.WriteLine(reader.GetValues(row));
-        //         for (int i = 0; i < reader.FieldCount; i++)
-        //         {
-        //             Console.WriteLine(row[i]);
-        //         }
-        //     }
-        // }
+            Package package = new Package();
+            package.Metadata.ID = rows[0]["id"].ToString();
+            package.Metadata.Name = rows[0]["name"].ToString();
+            package.Metadata.Version = new Version((int)rows[0]["version_major"], (int)rows[0]["version_minor"], (int)rows[0]["version_patch"]).ToString();
+            package.Data.Content = rows[0]["content"].ToString();
+            package.Data.URL = rows[0]["url"].ToString();
+            package.Data.JSProgram = rows[0]["js_program"].ToString();
+            return package;
+        }
 
         public async Task<bool> ExistsInPackageTable(int id)
         {
@@ -99,8 +97,8 @@ namespace PackageRegistry
             {"version_major", v.Major.ToString()},
             {"version_minor", v.Minor.ToString()},
             {"version_patch", v.Patch.ToString()},
-            // {"content", "'"+package.Data.Content+"'"},
-            {"url", "'"+package.Data.URL+"'"},
+            {"content", "'"+package.Data.Content.Replace("'", "''")+"'"},
+            {"url", "'"+package.Data.URL.Replace("'", "''")+"'"},
             {"js_program", "'"+package.Data.JSProgram.Replace("'", "''")+"'"},
         };
 

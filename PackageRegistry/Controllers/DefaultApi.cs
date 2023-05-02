@@ -203,7 +203,7 @@ namespace PackageRegistry.Controllers
         [SwaggerResponse(statusCode: 201, type: typeof(Package), description: "Success. Check the ID in the returned metadata for the official ID.")]
         public async virtual Task<IActionResult> PackageCreate([FromBody] PackageData body, [FromHeader] string xAuthorization)
         {
-            #if !NO_GCP
+#if !NO_GCP
             Program.LogDebug("Request: POST /package\n" + body.ToString());
 
             int code;
@@ -300,9 +300,9 @@ namespace PackageRegistry.Controllers
             // ? JsonConvert.DeserializeObject<Package>(exampleJson)
             // : default(Package);            //TODO: Change the data returned
             // return new ObjectResult(example);
-            #else
+#else
             return StatusCode(400);
-            #endif
+#endif
         }
 
         /// <summary>
@@ -416,7 +416,7 @@ namespace PackageRegistry.Controllers
         [SwaggerResponse(statusCode: 0, type: typeof(Error), description: "unexpected error")]
         public async virtual Task<IActionResult> PackageRetrieve([FromHeader] string xAuthorization, [FromRoute][Required] string id)
         {
-            Program.LogDebug("Request: DELETE /package/{id}\n" + "id: " + id);
+            Program.LogDebug("Request: GET /package/{id}\n" + "id: " + id);
 
             int code;
 
@@ -428,32 +428,32 @@ namespace PackageRegistry.Controllers
             catch (System.Exception e)
             {
                 code = 400;
-                Program.LogDebug("Response: DELETE /package/{id}\n" + "response: " + code + "\nCould not check exists." + "\nid: " + id + "\nexception: " + e.ToString());
+                Program.LogDebug("Response: GET /package/{id}\n" + "response: " + code + "\nCould not check exists." + "\nid: " + id + "\nexception: " + e.ToString());
                 return StatusCode(code);
             }
 
             if (!exists)
             {
                 code = 404;
-                Program.LogDebug("Response: DELETE /package/{id}\n" + "response: " + code + "\nPackage does not exist." + "\nid: " + id);
+                Program.LogDebug("Response: GET /package/{id}\n" + "response: " + code + "\nPackage does not exist." + "\nid: " + id);
                 return StatusCode(code);
             }
 
             Package package = null;
             try
             {
-                await Program.db.DeleteFromPackageTable(Int32.Parse(id));
+                package = await Program.db.SelectFromPackage(Int32.Parse(id));
             }
             catch (System.Exception e)
             {
                 code = 400;
-                Program.LogDebug("Response: DELETE /package/{id}\n" + "response: " + code + "\nCould not delete from database." + "\nid: " + id + "\nexception: " + e.ToString());
+                Program.LogDebug("Response: GET /package/{id}\n" + "response: " + code + "\nCould not get from database." + "\nid: " + id + "\nexception: " + e.ToString());
                 return StatusCode(code);
             }
 
             code = 200;
-            Program.LogDebug("Response: DELETE /package/{id}\n" + "response: " + code + "\nSuccessfully deleted." + "\nid: " + id);
-            return StatusCode(code);
+            Program.LogDebug("Response: GET /package/{id}\n" + "response: " + code + "\nid: " + id + "\npackage: " + package.ToString());
+            return StatusCode(code, package);
 
             //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..),-...
             // return StatusCode(200, default(Package));
@@ -564,7 +564,7 @@ namespace PackageRegistry.Controllers
         [SwaggerOperation("RegistryReset")]
         public async virtual Task<IActionResult> RegistryReset([FromHeader] string xAuthorization)
         {
-            #if !NO_GCP
+#if !NO_GCP
             Program.LogDebug("Request: DELETE /reset\n");
 
             int code;
@@ -588,9 +588,9 @@ namespace PackageRegistry.Controllers
 
             //TODO: Uncomment the next line to return response 400 or use other options such as return this.NotFound(), return this.BadRequest(..),-...
             // return StatusCode(401);
-            #else
+#else
             return StatusCode(400);
-            #endif
+#endif
         }
     }
 }

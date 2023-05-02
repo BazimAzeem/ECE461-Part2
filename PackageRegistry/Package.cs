@@ -21,6 +21,10 @@ namespace PackageRegistry
             this.Patch = Int32.Parse(vArray[2]);
         }
 
+        public override string ToString()
+        {
+            return this.Major.ToString() + "." + this.Minor.ToString() + "." + this.Patch.ToString();
+        }
     }
 
     public class ThePackage
