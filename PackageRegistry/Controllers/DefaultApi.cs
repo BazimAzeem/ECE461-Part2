@@ -329,7 +329,7 @@ namespace PackageRegistry.Controllers
             }
             catch (System.Exception e)
             {
-                code = 400;
+                code = 404;
                 Program.LogDebug("Response: DELETE /package/{id}\n" + "response: " + code + "\nCould not check exists." + "\nid: " + id + "\nexception: " + e.ToString());
                 return StatusCode(code);
             }
@@ -343,7 +343,7 @@ namespace PackageRegistry.Controllers
 
             try
             {
-                await Program.db.DeleteFromPackageTable(Int32.Parse(id));
+                await Program.db.DeleteFromPackageTable(id);
             }
             catch (System.Exception e)
             {
@@ -384,7 +384,7 @@ namespace PackageRegistry.Controllers
             }
             catch (System.Exception e)
             {
-                code = 400;
+                code = 404;
                 Program.LogDebug("Response: GET /package/{id}/rate\n" + "response: " + code + "\nCould not check exists." + "\nid: " + id + "\nexception: " + e.ToString());
                 return StatusCode(code);
             }
@@ -487,7 +487,7 @@ namespace PackageRegistry.Controllers
             }
             catch (System.Exception e)
             {
-                code = 400;
+                code = 404;
                 Program.LogDebug("Response: GET /package/{id}\n" + "response: " + code + "\nCould not check exists." + "\nid: " + id + "\nexception: " + e.ToString());
                 return StatusCode(code);
             }
@@ -502,7 +502,7 @@ namespace PackageRegistry.Controllers
             Package package = null;
             try
             {
-                package = await Program.db.SelectFromPackage(Int32.Parse(id));
+                package = await Program.db.SelectFromPackage(id);
             }
             catch (System.Exception e)
             {
@@ -552,6 +552,14 @@ namespace PackageRegistry.Controllers
 
             int code;
 
+            if (id != body.Metadata.ID)
+            {
+                code = 400;
+                Program.LogDebug("Response: PUT /package/{id}\n" + "response: " + code + "\n IDs do not match.");
+                return StatusCode(code);
+            }
+
+
             Package package = null;
             if (!string.IsNullOrWhiteSpace(body.Data.Content) && string.IsNullOrWhiteSpace(body.Data.URL))
             {
@@ -594,7 +602,7 @@ namespace PackageRegistry.Controllers
             }
             catch (System.Exception e)
             {
-                code = 400;
+                code = 404;
                 Program.LogDebug("Response: PUT /package/{id}\n" + "response: " + code + "\nCould not check exists." + "\nid: " + id + "\nexception: " + e.ToString());
                 return StatusCode(code);
             }
@@ -608,7 +616,7 @@ namespace PackageRegistry.Controllers
 
             try
             {
-                await Program.db.UpdatePackageTable(Int32.Parse(id), body.Data);
+                await Program.db.UpdatePackageTable(id, body.Data);
             }
             catch (System.Exception e)
             {

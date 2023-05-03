@@ -81,10 +81,10 @@ namespace PackageRegistry
             return result;
         }
 
-        public async Task<Package> SelectFromPackage(int id)
+        public async Task<Package> SelectFromPackage(string id)
         {
             var columns = new List<string> { "id", "name", "version_major", "version_minor", "version_patch", "content", "url", "js_program" };
-            var where = new Dictionary<string, string> { { "id", id.ToString() } };
+            var where = new Dictionary<string, string> { { "id", id } };
             var rows = await this.packageTable.Select(columns, where);
 
             Package package = new Package();
@@ -149,14 +149,14 @@ namespace PackageRegistry
             return id;
         }
 
-        public async Task UpdatePackageTable(int id, PackageData data)
+        public async Task UpdatePackageTable(string id, PackageData data)
         {
             var set = new Dictionary<string, string> {
                 {"content", data.Content},
                 {"url", data.URL},
                 {"js_program", data.JSProgram}
             };
-            var where = new Dictionary<string, string> { { "id", id.ToString() } };
+            var where = new Dictionary<string, string> { { "id", id } };
             await this.packageTable.Update(set, where);
         }
 
@@ -166,9 +166,9 @@ namespace PackageRegistry
             await this.packageTable.Delete();
         }
 
-        public async Task DeleteFromPackageTable(int id)
+        public async Task DeleteFromPackageTable(string id)
         {
-            var where = new Dictionary<string, string> { { "id", id.ToString() } };
+            var where = new Dictionary<string, string> { { "id", id } };
             await this.packageTable.Delete(where);
         }
     }
