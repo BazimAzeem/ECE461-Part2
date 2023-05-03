@@ -647,11 +647,27 @@ namespace PackageRegistry.Controllers
         [ValidateModelState]
         [SwaggerOperation("PackagesList")]
         [SwaggerResponse(statusCode: 200, type: typeof(List<PackageMetadata>), description: "List of packages")]
-        public virtual IActionResult PackagesList([FromBody] List<PackageQuery> body, [FromHeader] string xAuthorization, [FromQuery] string offset)
+        public async virtual Task<IActionResult> PackagesList([FromBody] List<PackageQuery> body, [FromHeader] string xAuthorization, [FromQuery] string offset)
         {
-            Program.LogDebug("Request: PUT/package/{id}s\n" + body.ToString() + "\noffset: " + offset);
+            Program.LogDebug("Request: POST /packages\n" + body.ToString() + "\noffset: " + offset);
 
-            ActionResult response;
+            int code;
+
+            List<PackageMetadata> packages = null;
+            try
+            {
+                packages = await Program.db.SelectFromPackage();
+            }
+            catch (System.Exception e)
+            {
+                code = 400;
+                Program.LogDebug("Response: POST /packages\n" + "response: " + code + "\nCould not get packages." + "\nexception: " + e.ToString());
+                return StatusCode(code);
+            }
+
+            code = 200;
+            Program.LogDebug("Response: POST /packages\n" + "response: " + code + "\npackages: \n" + string.Join("\n", packages.ConvertAll<string>(x => x.ToString())));
+            return StatusCode(code, packages);
 
             //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..),-...
             // return StatusCode(200, default(List<PackageMetadata>));

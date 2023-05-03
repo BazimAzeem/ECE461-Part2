@@ -64,6 +64,23 @@ namespace PackageRegistry
         //     }
         // }
 
+        public async Task<List<PackageMetadata>> SelectFromPackage()
+        {
+            var columns = new List<string> { "id", "name", "version_major", "version_minor", "version_patch" };
+            var rows = await this.packageTable.Select(columns);
+
+            var result = new List<PackageMetadata> { };
+            foreach (var row in rows)
+            {
+                PackageMetadata metadata = new PackageMetadata();
+                metadata.ID = row["id"].ToString();
+                metadata.Name = row["name"].ToString();
+                metadata.Version = new Version((int)row["version_major"], (int)row["version_minor"], (int)row["version_patch"]).ToString();
+                result.Add(metadata);
+            }
+            return result;
+        }
+
         public async Task<Package> SelectFromPackage(int id)
         {
             var columns = new List<string> { "id", "name", "version_major", "version_minor", "version_patch", "content", "url", "js_program" };
