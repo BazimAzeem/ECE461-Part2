@@ -157,7 +157,7 @@ namespace PackageRegistry.Controllers
         [SwaggerResponse(statusCode: 200, type: typeof(List<PackageMetadata>), description: "Return a list of packages.")]
         public virtual IActionResult PackageByRegExGet([FromBody] PackageRegEx body, [FromHeader] string xAuthorization)
         {
-            Program.LogDebug("Request: PUT/package/{id}/byRegex/{regex}\n" + body.ToString() + "regex: " + body.ToString());
+            Program.LogDebug("Request: POST /package/byRegex/{regex}\n" + body.ToString() + "regex: " + body.ToString());
 
             int code;
 
@@ -166,7 +166,7 @@ namespace PackageRegistry.Controllers
 
             //TODO: Uncomment the next line to return response 400 or use other options such as return this.NotFound(), return this.BadRequest(..),-...
             code = 400;
-            Program.LogDebug("Response: GET /package/byRegex/{regex}\n" + "response: " + code + "\nNot implemented." + "regex: " + body.ToString());
+            Program.LogDebug("Response: POST /package/byRegex/{regex}\n" + "response: " + code + "\nNot implemented." + "regex: " + body.ToString());
             return StatusCode(code);
 
             //TODO: Uncomment the next line to return response 404 or use other options such as return this.NotFound(), return this.BadRequest(..),-...
@@ -197,7 +197,7 @@ namespace PackageRegistry.Controllers
         public async virtual Task<IActionResult> PackageCreate([FromBody] PackageData body, [FromHeader] string xAuthorization)
         {
 #if !NO_GCP
-            Program.LogDebug("Request: PUT/package/{id}\n" + body.ToString());
+            Program.LogDebug("Request: POST /package\n" + body.ToString());
 
             int code;
             Package package;
@@ -210,7 +210,7 @@ namespace PackageRegistry.Controllers
                 catch (System.Exception e)
                 {
                     code = 400;
-                    Program.LogDebug("Response: PUT/package/{id}\n" + "response: " + code + "\nFailed to create package from content." + "\nexception: " + e.ToString());
+                    Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nFailed to create package from content." + "\nexception: " + e.ToString());
                     return StatusCode(code);
                 }
             }
@@ -223,14 +223,14 @@ namespace PackageRegistry.Controllers
                 catch (System.Exception e)
                 {
                     code = 400;
-                    Program.LogDebug("Response: PUT/package/{id}\n" + "response: " + code + "\nFailed to create package from URL." + "\nexception: " + e.ToString());
+                    Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nFailed to create package from URL." + "\nexception: " + e.ToString());
                     return StatusCode(code);
                 }
             }
             else
             {
                 code = 400;
-                Program.LogDebug("Response: PUT/package/{id}\n" + "response: " + code + "\nInvalid request format.");
+                Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nInvalid request format.");
                 return StatusCode(code);
             }
             package.Data.JSProgram = body.JSProgram;
@@ -242,21 +242,21 @@ namespace PackageRegistry.Controllers
                 if (mc.error_level == MetricsCalculator.ERROR_ERROR)
                 {
                     code = 400;
-                    Program.LogDebug("Response: PUT/package/{id}\n" + "response: " + code + "\nError in metric calculations.");
+                    Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nError in metric calculations.");
                     return StatusCode(code);
                 }
             }
             catch (System.Exception e)
             {
                 code = 400;
-                Program.LogDebug("Response: PUT/package/{id}\n" + "response: " + code + "\nFailed to calculate metrics." + "\nexception: " + e.ToString());
+                Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nFailed to calculate metrics." + "\nexception: " + e.ToString());
                 return StatusCode(code);
             }
 
             if (mc.Calculate() < 0)
             {
                 code = 424;
-                Program.LogDebug("Response: PUT/package/{id}\n" + "response: " + code + "\nScore is too low" + "\nmetrics: " + mc.ToString());
+                Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nScore is too low" + "\nmetrics: " + mc.ToString());
                 return StatusCode(code);
             }
 
@@ -270,26 +270,26 @@ namespace PackageRegistry.Controllers
                 if (e.SqlState == Npgsql.PostgresErrorCodes.UniqueViolation)
                 {
                     code = 409;
-                    Program.LogDebug("Response: PUT/package/{id}\n" + "response: " + code + "\nPackage already exists.");
+                    Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nPackage already exists.");
                     return StatusCode(code);
                 }
                 else
                 {
                     code = 400;
-                    Program.LogDebug("Response: PUT/package/{id}\n" + "response: " + code + "\nFailed to insert package into database. Unexpected PostgreSQL error." + "\nexception: " + e.ToString());
+                    Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nFailed to insert package into database. Unexpected PostgreSQL error." + "\nexception: " + e.ToString());
                     return StatusCode(code);
                 }
             }
             catch (System.Exception e)
             {
                 code = 400;
-                Program.LogDebug("Response: PUT/package/{id}\n" + "response: " + code + "\nFailed to insert package into database." + "\nexception: " + e.ToString());
+                Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nFailed to insert package into database." + "\nexception: " + e.ToString());
                 return StatusCode(code);
             }
             package.Metadata.ID = id.ToString();
 
             code = 201;
-            Program.LogDebug("Response: PUT/package/{id}\n" + "response: " + code + "\npackage: " + package.ToString());
+            Program.LogDebug("Response: POST /package\n" + "response: " + code + "\npackage: " + package.ToString());
             return StatusCode(code, package);
 
             // string exampleJson = null;

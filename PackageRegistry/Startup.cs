@@ -61,8 +61,8 @@ namespace PackageRegistry
                 })
                 .AddNewtonsoftJson(opts =>
                 {
-                    opts.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
-                    opts.SerializerSettings.Converters.Add(new StringEnumConverter(new CamelCaseNamingStrategy()));
+                    opts.SerializerSettings.ContractResolver = new DefaultContractResolver();
+                    opts.SerializerSettings.Converters.Add(new StringEnumConverter(new DefaultNamingStrategy()));
                 })
                 .AddXmlSerializerFormatters();
 
