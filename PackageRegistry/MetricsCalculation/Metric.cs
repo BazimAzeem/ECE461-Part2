@@ -423,7 +423,7 @@ namespace PackageRegistry.MetricsCalculation
                         {
                             if (line.ToLower().Contains(license))
                             {
-                                parentLibrary.LogDebug("found compatible license: " + license + " for " + owner + "/" + repo);
+                                parentLibrary.LogInfo("found compatible license: " + license + " for " + owner + "/" + repo);
                                 score += 0.5F;
                             }
                         }
@@ -433,7 +433,7 @@ namespace PackageRegistry.MetricsCalculation
                         {
                             if (line.Contains(license))
                             {
-                                parentLibrary.LogDebug("found incompatible license: " + license + " for " + owner + "/" + repo);
+                                parentLibrary.LogInfo("found incompatible license: " + license + " for " + owner + "/" + repo);
                                 score -= 0.5F;
                             }
                         }
@@ -509,7 +509,7 @@ namespace PackageRegistry.MetricsCalculation
                 string responseContent = await response.Content.ReadAsStringAsync();
                 // Deserialize the response content to an array of commit objects
                 var commits = Newtonsoft.Json.JsonConvert.DeserializeObject<Commit[]>(responseContent);
-                parentLibrary.LogDebug($"Total commits retreived in the repository {owner}/{repo}: {commits.Length}");
+                parentLibrary.LogInfo($"Total commits retreived in the repository {owner}/{repo}: {commits.Length}");
 
                 int num_commits = commits.Length;
                 int num_pr_commits = 0;
@@ -528,7 +528,7 @@ namespace PackageRegistry.MetricsCalculation
                 }
 
                 this.score = ((float)num_pr_commits) / num_commits;
-                parentLibrary.LogDebug($"Found {num_commits} commits");
+                parentLibrary.LogInfo($"Found {num_commits} commits");
             }
             else
             {
@@ -686,7 +686,7 @@ namespace PackageRegistry.MetricsCalculation
                     }
                     else
                     {
-                        parentLibrary.LogDebug(dependencyCount + " dependencies found in " + owner + "/" + repo);
+                        parentLibrary.LogInfo(dependencyCount + " dependencies found in " + owner + "/" + repo);
                         this.score = 1 - ((float)numNotPinned) / dependencyCount;
                     }
                 }

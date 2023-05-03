@@ -210,7 +210,7 @@ namespace PackageRegistry.Controllers
                 catch (System.Exception e)
                 {
                     code = 400;
-                    Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nFailed to create package from content." + "\nexception: " + e.ToString());
+                    Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nFailed to create package from content." + "\nexception: " + e.ToString() + "\nbody" + body.ToString());
                     return StatusCode(code);
                 }
             }
@@ -223,14 +223,14 @@ namespace PackageRegistry.Controllers
                 catch (System.Exception e)
                 {
                     code = 400;
-                    Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nFailed to create package from URL." + "\nexception: " + e.ToString());
+                    Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nFailed to create package from URL." + "\nexception: " + e.ToString() + "\nbody" + body.ToString());
                     return StatusCode(code);
                 }
             }
             else
             {
                 code = 400;
-                Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nInvalid request format.");
+                Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nInvalid request format." + "\nbody" + body.ToString());
                 return StatusCode(code);
             }
             package.Data.JSProgram = body.JSProgram;
@@ -242,14 +242,14 @@ namespace PackageRegistry.Controllers
                 if (mc.error_level == MetricsCalculator.ERROR_ERROR)
                 {
                     code = 400;
-                    Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nError in metric calculations.");
+                    Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nError in metric calculations." + "\nbody" + body.ToString());
                     return StatusCode(code);
                 }
             }
             catch (System.Exception e)
             {
                 code = 400;
-                Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nFailed to calculate metrics." + "\nexception: " + e.ToString());
+                Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nFailed to calculate metrics." + "\nexception: " + e.ToString() + "\nbody" + body.ToString());
                 return StatusCode(code);
             }
 
@@ -270,20 +270,20 @@ namespace PackageRegistry.Controllers
                 if (e.SqlState == Npgsql.PostgresErrorCodes.UniqueViolation)
                 {
                     code = 409;
-                    Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nPackage already exists.");
+                    Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nPackage already exists." + "\nbody" + body.ToString());
                     return StatusCode(code);
                 }
                 else
                 {
                     code = 400;
-                    Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nFailed to insert package into database. Unexpected PostgreSQL error." + "\nexception: " + e.ToString());
+                    Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nFailed to insert package into database. Unexpected PostgreSQL error." + "\nexception: " + e.ToString() + "\nbody" + body.ToString());
                     return StatusCode(code);
                 }
             }
             catch (System.Exception e)
             {
                 code = 400;
-                Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nFailed to insert package into database." + "\nexception: " + e.ToString());
+                Program.LogDebug("Response: POST /package\n" + "response: " + code + "\nFailed to insert package into database." + "\nexception: " + e.ToString() + "\nbody" + body.ToString());
                 return StatusCode(code);
             }
             package.Metadata.ID = id.ToString();
@@ -325,7 +325,7 @@ namespace PackageRegistry.Controllers
             bool exists = false;
             try
             {
-                exists = await Program.db.ExistsInPackageTable(Int32.Parse(id));
+                exists = await Program.db.ExistsInPackageTable(id);
             }
             catch (System.Exception e)
             {
@@ -380,7 +380,7 @@ namespace PackageRegistry.Controllers
             bool exists = false;
             try
             {
-                exists = await Program.db.ExistsInPackageTable(Int32.Parse(id));
+                exists = await Program.db.ExistsInPackageTable(id);
             }
             catch (System.Exception e)
             {
@@ -399,7 +399,7 @@ namespace PackageRegistry.Controllers
             string url = null;
             try
             {
-                url = await Program.db.SelectURLFromPackage(Int32.Parse(id));
+                url = await Program.db.SelectURLFromPackage(id);
             }
             catch (System.Exception e)
             {
@@ -483,7 +483,7 @@ namespace PackageRegistry.Controllers
             bool exists = false;
             try
             {
-                exists = await Program.db.ExistsInPackageTable(Int32.Parse(id));
+                exists = await Program.db.ExistsInPackageTable(id);
             }
             catch (System.Exception e)
             {
@@ -649,7 +649,7 @@ namespace PackageRegistry.Controllers
         [SwaggerResponse(statusCode: 200, type: typeof(List<PackageMetadata>), description: "List of packages")]
         public async virtual Task<IActionResult> PackagesList([FromBody] List<PackageQuery> body, [FromHeader] string xAuthorization, [FromQuery] string offset)
         {
-            Program.LogDebug("Request: POST /packages\n" + body.ToString() + "\noffset: " + offset);
+            Program.LogDebug("Request: POST /packages\n" + "body: " + string.Join("\n", body.ConvertAll<string>(x => x.ToString())) + "\noffset: " + offset);
 
             int code;
 

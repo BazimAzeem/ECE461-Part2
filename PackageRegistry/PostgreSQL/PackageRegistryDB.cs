@@ -97,20 +97,20 @@ namespace PackageRegistry
             return package;
         }
 
-        public async Task<string> SelectURLFromPackage(int id)
+        public async Task<string> SelectURLFromPackage(string id)
         {
             var columns = new List<string> { "url" };
-            var where = new Dictionary<string, string> { { "id", id.ToString() } };
+            var where = new Dictionary<string, string> { { "id", id } };
             var rows = await this.packageTable.Select(columns, where);
 
             return rows[0]["url"].ToString();
         }
 
 
-        public async Task<bool> ExistsInPackageTable(int id)
+        public async Task<bool> ExistsInPackageTable(string id)
         {
             var columns = new List<string> { "id" };
-            var where = new Dictionary<string, string> { { "id", id.ToString() } };
+            var where = new Dictionary<string, string> { { "id", id } };
             var rows = await this.packageTable.Select(columns, where);
             return rows.Count == 0 ? false : true;
         }
