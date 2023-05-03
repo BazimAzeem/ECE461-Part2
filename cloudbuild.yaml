@@ -8,4 +8,5 @@ steps:
     '--cache-from', 'us.gcr.io/$PROJECT_ID/package-registry:latest',
     '.' 
   ]
+
 images: [us.gcr.io/$PROJECT_ID/package-registry:latest]

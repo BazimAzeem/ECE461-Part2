@@ -5,14 +5,16 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile
-      target: base
+      target: build-env
      
     image: ece461_project2:latest
 
-    command: bash -c "./run" 
+    command: bash -c "cd /home/project2 && ./run" 
 
     volumes:
       - ./PackageRegistry:/home/project2/PackageRegistry
-    # env_file:
-    #   - .env
+      - ./PackageRegistry.Tests:/home/project2/PackageRegistry.Tests
+      - ./run:/home/project2/run
+    env_file:
+      - .env
       

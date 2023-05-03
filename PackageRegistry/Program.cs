@@ -1,17 +1,27 @@
 using System;
 using System.Text;
 using System.IO;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore;
+using Google.Api;
+using Google.Api.Gax.Grpc;
+using Google.Api.Gax.ResourceNames;
+using Google.Cloud.Logging.V2;
+using Google.Cloud.Logging.Type;
+using Grpc.Core;
+using PackageRegistry.MetricsCalculation;
 
 namespace PackageRegistry
 {
     public class Program
     {
+#if !NO_GCP
+        public static PackageRegistryDB db = new PackageRegistryDB();
+#endif
+
         // parameters
         public const double REQUEST_TIMEOUT_TIME = 10;
-
-
 
         // members
         public static short LOG_LEVEL = 1; // 0 is silent, 1 means informational messages, 2 means debug messages
@@ -19,10 +29,15 @@ namespace PackageRegistry
         public static short ProgramStatus = 0;
         public static StringBuilder log = new StringBuilder();
 
+#if !NO_GCP
+        public static LoggingServiceV2Client logClient = LoggingServiceV2Client.Create();
+#endif
+
+
 
         public static int Main(String[] args)
         {
-            Console.WriteLine("running");
+
             new Program(args);
             return ProgramStatus;
 
@@ -50,7 +65,46 @@ namespace PackageRegistry
                 LOG_FILE = log_file_env_var;
             }
 
-            CreateWebHostBuilder(args).Build().Run();
+#if NO_GCP
+            string[] urls = new string[] { "https://github.com/lodash/lodash", "https://github.com/taylorhakes/fecha", "https://github.com/axios/axios", "https://github.com/cloudinary/cloudinary_npm" };
+
+            MetricsCalculator[] metricsCalculators = new MetricsCalculator[urls.Length];
+
+            for (int i = 0; i < urls.Length; i++)
+            {
+                metricsCalculators[i] = new MetricsCalculator(urls[i]);
+                metricsCalculators[i].Calculate();
+            }
+
+
+            for (int i = 0; i < urls.Length; i++)
+            {
+                Console.WriteLine(metricsCalculators[i].ToString());
+            }
+            return;
+
+#endif
+
+
+
+            try
+            {
+                CreateWebHostBuilder(args).Build().Run();
+            }
+            catch (Exception ex)
+            {
+                string logMessage = string.Format("Exception message: {0}\nException type: {1}\nStack trace:\n{2}",
+                    ex.Message, ex.GetType().FullName, ex.StackTrace);
+                if (ex.InnerException != null)
+                {
+                    logMessage += string.Format("\n\nInner exception message: {0}\nInner exception type: {1}\nInner exception stack trace:\n{2}",
+                        ex.InnerException.Message, ex.InnerException.GetType().FullName, ex.InnerException.StackTrace);
+                }
+
+                LogError("Unexcepted exception occured in CreateWebHostBuilder " + logMessage);
+            }
+
+
         }
 
         /// <summary>
@@ -62,18 +116,23 @@ namespace PackageRegistry
     WebHost.CreateDefaultBuilder(args)
         .UseStartup<Startup>();
 
-
-        ~Program()
+        public void AppendToLog()
         {
             // append to the log file when we destroy this class
             try
             {
                 File.AppendAllText(LOG_FILE, log.ToString());
+                log.Clear();
             }
             catch (DirectoryNotFoundException)
             {
                 LogWarning("Log file directory not found. Check your LOG_FILE environment variable");
             }
+        }
+
+        ~Program()
+        {
+            AppendToLog();
         }
 
 
@@ -94,11 +153,15 @@ namespace PackageRegistry
             }
 
 
+            WriteLogEntry("ERROR", msg, LogSeverity.Error);
+
+
+
         }
         public static void LogWarning(string msg)
         {
 
-            string outmsg = "[WARNING] " + msg;
+            string outmsg = "[WARNING]" + msg;
 
             if (LOG_LEVEL >= 1)
             {
@@ -108,6 +171,8 @@ namespace PackageRegistry
 
                 log.AppendLine(outmsg);
             }
+
+            WriteLogEntry("WARNING", msg, LogSeverity.Warning);
         }
 
         public static void LogInfo(string msg)
@@ -120,6 +185,8 @@ namespace PackageRegistry
 
                 log.AppendLine(outmsg);
             }
+
+            WriteLogEntry("INFO", msg, LogSeverity.Info);
         }
 
         public static void LogDebug(string msg)
@@ -136,6 +203,38 @@ namespace PackageRegistry
             {
                 log.AppendLine(outmsg);
             }
+
+            WriteLogEntry("DEBUG", msg, LogSeverity.Debug);
+        }
+
+        private static readonly CallSettings _retryAWhile = CallSettings.FromRetry(
+            RetrySettings.FromExponentialBackoff(
+                maxAttempts: 15,
+                initialBackoff: TimeSpan.FromSeconds(3),
+                maxBackoff: TimeSpan.FromSeconds(12),
+                backoffMultiplier: 2.0,
+                retryFilter: RetrySettings.FilterForStatusCodes(StatusCode.Internal, StatusCode.DeadlineExceeded)));
+
+        public static void WriteLogEntry(string logId, string message, LogSeverity severity)
+        {
+#if !NO_GCP
+            LogName logName = new LogName("ece-461-380500", logId);
+            LogEntry logEntry = new LogEntry
+            {
+                LogNameAsLogName = logName,
+                Severity = severity,
+                TextPayload = message
+            };
+            MonitoredResource resource = new MonitoredResource { Type = "global" };
+            IDictionary<string, string> entryLabels = new Dictionary<string, string>
+                {
+                    { "size", "large" },
+                    { "color", "red" }
+                };
+            logClient.WriteLogEntries(logName, resource, entryLabels,
+                new[] { logEntry }, _retryAWhile);
+            Console.WriteLine($"Created log entry in log-id: {logId}.");
+#endif
         }
     }
 }

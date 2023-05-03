@@ -11,6 +11,8 @@ using static Octokit.GraphQL.Variable;
 using Connection = Octokit.GraphQL.Connection;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text;
+using System.Text.Json;
 
 
 namespace PackageRegistry.MetricsCalculation
@@ -50,7 +52,7 @@ namespace PackageRegistry.MetricsCalculation
         public RampUp(MetricsCalculator parentLibrary) : base(parentLibrary)
         {
             this.weight = 1;
-            this.name = "RAMP_UP_SCORE";
+            this.name = "rampUp";
         }
 
         private float sigmoid(float x)
@@ -68,7 +70,7 @@ namespace PackageRegistry.MetricsCalculation
 
                 if (access_token is null || access_token.Length == 0)
                 {
-                    Program.LogError("access token not set. Ensure the env variable GITHUB_TOKEN is set");
+                    parentLibrary.LogError("access token not set. Ensure the env variable GITHUB_TOKEN is set");
                     return;
                 }
                 // FIXME name and repo needs to be parsed from url
@@ -90,7 +92,7 @@ namespace PackageRegistry.MetricsCalculation
 
                 if (codeSize == 0)
                 {
-                    Program.LogError("repository " + this.parentLibrary.owner + "/" + this.parentLibrary.name + " has a code size of zero");
+                    parentLibrary.LogError("repository " + this.parentLibrary.owner + "/" + this.parentLibrary.name + " has a code size of zero");
                     this.score = 0;
 
                 }
@@ -108,11 +110,11 @@ namespace PackageRegistry.MetricsCalculation
             }
             catch (Octokit.AuthorizationException)
             {
-                Program.LogError("Bad credentials. Check your access token.");
+                parentLibrary.LogError("Bad credentials. Check your access token.");
             }
             catch (Octokit.NotFoundException)
             {
-                Program.LogError("Non existent repository");
+                parentLibrary.LogError("Non existent repository");
             }
         }
     }
@@ -122,8 +124,8 @@ namespace PackageRegistry.MetricsCalculation
 
         public Correctness(MetricsCalculator parentLibrary) : base(parentLibrary)
         {
-            this.weight = 1;
-            this.name = "CORRECTNESS_SCORE";
+            this.weight = 2;
+            this.name = "correctness";
         }
 
 
@@ -136,7 +138,7 @@ namespace PackageRegistry.MetricsCalculation
 
                 if (access_token is null || access_token.Length == 0)
                 {
-                    Program.LogError("access token not set. Ensure the env variable GITHUB_TOKEN is set");
+                    parentLibrary.LogError("access token not set. Ensure the env variable GITHUB_TOKEN is set");
                     return;
                 }
 
@@ -196,11 +198,11 @@ namespace PackageRegistry.MetricsCalculation
             }
             catch (Octokit.AuthorizationException)
             {
-                Program.LogError("Bad credentials. Check your access token.");
+                parentLibrary.LogError("Bad credentials. Check your access token.");
             }
             catch (Octokit.NotFoundException)
             {
-                Program.LogError("Non existent repository");
+                parentLibrary.LogError("Non existent repository");
             }
         }
     }
@@ -210,8 +212,8 @@ namespace PackageRegistry.MetricsCalculation
 
         public ResponsiveMaintainer(MetricsCalculator parentLibrary) : base(parentLibrary)
         {
-            this.weight = 2;
-            this.name = "RESPONSIVE_MAINTAINER_SCORE";
+            this.weight = 1;
+            this.name = "responsiveMaintainer";
         }
 
 
@@ -225,7 +227,7 @@ namespace PackageRegistry.MetricsCalculation
 
                 if (access_token is null || access_token.Length == 0)
                 {
-                    Program.LogError("access token not set. Ensure the env variable GITHUB_TOKEN is set");
+                    parentLibrary.LogError("access token not set. Ensure the env variable GITHUB_TOKEN is set");
                     return;
                 }
 
@@ -255,17 +257,17 @@ namespace PackageRegistry.MetricsCalculation
                     var curDate = System.DateTimeOffset.Now;
                     var timeSinceLastCommit = curDate - lastCommitDate;
 
-                    this.score = (float)Math.Exp(-0.01 * timeSinceLastCommit.Days);
+                    this.score = (float)Math.Exp(-0.001 * timeSinceLastCommit.Days);
 
                 }
             }
             catch (Octokit.AuthorizationException)
             {
-                Program.LogError("Bad credentials. Check your access token.");
+                parentLibrary.LogError("Bad credentials. Check your access token.");
             }
             catch (Octokit.NotFoundException)
             {
-                Program.LogError("Non existent repository");
+                parentLibrary.LogError("Non existent repository");
             }
         }
     }
@@ -274,8 +276,8 @@ namespace PackageRegistry.MetricsCalculation
     {
         public BusFactor(MetricsCalculator parentLibrary) : base(parentLibrary)
         {
-            this.weight = 1;
-            this.name = "BUS_FACTOR_SCORE";
+            this.weight = 2;
+            this.name = "busFactor";
         }
 
         public override async Task Calculate()
@@ -287,7 +289,7 @@ namespace PackageRegistry.MetricsCalculation
 
                 if (access_token is null || access_token.Length == 0)
                 {
-                    Program.LogError("access token not set. Ensure the env variable GITHUB_TOKEN is set");
+                    parentLibrary.LogError("access token not set. Ensure the env variable GITHUB_TOKEN is set");
                     return;
                 }
 
@@ -322,15 +324,15 @@ namespace PackageRegistry.MetricsCalculation
             }
             catch (Octokit.AuthorizationException)
             {
-                Program.LogError("Bad credentials. Check your access token.");
+                parentLibrary.LogError("Bad credentials. Check your access token.");
             }
             catch (Octokit.NotFoundException)
             {
-                Program.LogError("Non existent repository");
+                parentLibrary.LogError("Non existent repository");
             }
         }
     }
-    public class LicenseMetric : Metric
+    public class LicenseScore : Metric
     {
 
         /// The list of compatible licenses with this project
@@ -338,10 +340,12 @@ namespace PackageRegistry.MetricsCalculation
 
         string[] incompatibleLicenses = { "gplv2", "gplv2+", "gplv3", "gplv3+", "affero gplv3", "apache2.0", "mpl", "mpl 1.1" };
 
-        public LicenseMetric(MetricsCalculator parentLibrary) : base(parentLibrary)
+        HttpClient httpClient = new HttpClient();
+
+        public LicenseScore(MetricsCalculator parentLibrary) : base(parentLibrary)
         {
             this.weight = 1;
-            this.name = "LICENSE_SCORE";
+            this.name = "licenseScore";
         }
 
 
@@ -351,33 +355,56 @@ namespace PackageRegistry.MetricsCalculation
             try
             {
 
-                string access_token = Environment.GetEnvironmentVariable("GITHUB_TOKEN");
+                string token = Environment.GetEnvironmentVariable("GITHUB_TOKEN");
 
-                if (access_token is null || access_token.Length == 0)
+                if (token is null || token.Length == 0)
                 {
-                    Program.LogError("access token not set. Ensure the env variable GITHUB_TOKEN is set");
+                    parentLibrary.LogError("access token not set. Ensure the env variable GITHUB_TOKEN is set");
                     return;
                 }
 
-                var client = new GitHubClient(new Octokit.ProductHeaderValue("ECE461_CLI"));
-                var tokenAuth = new Octokit.Credentials(access_token);
-                client.Credentials = tokenAuth;
-
-                var repo = await client.Repository.Get(this.parentLibrary.owner, this.parentLibrary.name);
 
 
 
-                string readme = await client.Repository.Content.GetReadmeHtml(repo.Id);
-                //string readme = (await client.Repository.Content.GetReadme(repo.Id)).Content;
+                // get license + readme file
+                string owner = this.parentLibrary.owner;
+                string repo = this.parentLibrary.name;
 
-                // Console.WriteLine(readme);
+                httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("my-cool-cli", "1.0"));
+                httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
 
-                string[] readmeLines = readme.Split("<");
+                string content = "";
+                JsonElement contentObj;
+                byte[] contentBytes;
+
+
+                // Send the GET request to retrieve the contents of the package.json file
+                var response = await httpClient.GetAsync($"https://api.github.com/repos/{owner}/{repo}/contents/LICENSE");
+                string responseString = await response.Content.ReadAsStringAsync();
+                if (!responseString.Contains("Not Found"))
+                {
+                    contentObj = JsonSerializer.Deserialize<JsonElement>(responseString);
+                    contentBytes = Convert.FromBase64String(contentObj.GetProperty("content").GetString());
+                    content += Encoding.UTF8.GetString(contentBytes);
+                }
+
+                response = await httpClient.GetAsync($"https://api.github.com/repos/{owner}/{repo}/contents/README.md");
+                responseString = await response.Content.ReadAsStringAsync();
+                if (!responseString.Contains("Not Found"))
+                {
+                    contentObj = JsonSerializer.Deserialize<JsonElement>(responseString);
+                    contentBytes = Convert.FromBase64String(contentObj.GetProperty("content").GetString());
+                    content += Encoding.UTF8.GetString(contentBytes);
+                }
+
+                string[] licensefilelines = content.Split("\n");
+
+
 
                 List<string> licenseLines = new List<string>();
 
                 // search for all lines that mention a license
-                foreach (string line in readmeLines)
+                foreach (string line in licensefilelines)
                 {
                     if (line.ToLower().Contains("license")) licenseLines.Add(line.ToLower());
                 }
@@ -390,13 +417,13 @@ namespace PackageRegistry.MetricsCalculation
                     // search through all lines that could contain the license
                     foreach (string line in licenseLines)
                     {
-                        // Program.LogDebug("Searching line " + line + "for licenses");
+                        // parentLibrary.LogDebug("Searching line " + line + "for licenses");
                         // if we found a compatible license, increase the score
                         foreach (string license in compatibleLicenses)
                         {
-                            if (line.Contains(license))
+                            if (line.ToLower().Contains(license))
                             {
-                                Program.LogDebug("found compatible license: " + license);
+                                parentLibrary.LogInfo("found compatible license: " + license + " for " + owner + "/" + repo);
                                 score += 0.5F;
                             }
                         }
@@ -406,7 +433,7 @@ namespace PackageRegistry.MetricsCalculation
                         {
                             if (line.Contains(license))
                             {
-                                Program.LogDebug("found incompatible license: " + license);
+                                parentLibrary.LogInfo("found incompatible license: " + license + " for " + owner + "/" + repo);
                                 score -= 0.5F;
                             }
                         }
@@ -429,23 +456,23 @@ namespace PackageRegistry.MetricsCalculation
             }
             catch (Octokit.AuthorizationException)
             {
-                Program.LogError("Bad credentials. Check your access token.");
+                parentLibrary.LogError("Bad credentials. Check your access token.");
             }
             catch (Octokit.NotFoundException)
             {
-                Program.LogError("Non existent repository");
+                parentLibrary.LogError("Non existent repository");
             }
         }
     }
 
-    public class PRRatio : Metric
+    public class PullRequest : Metric
     {
         HttpClient httpClient = new HttpClient();
         readonly int PER_PAGE = 1000;
-        public PRRatio(MetricsCalculator parentLibrary) : base(parentLibrary)
+        public PullRequest(MetricsCalculator parentLibrary) : base(parentLibrary)
         {
             this.weight = 1;
-            this.name = "PULL_REQUEST_RATIO_SCORE";
+            this.name = "pullRequest";
         }
 
         private float sigmoid(float x)
@@ -468,7 +495,7 @@ namespace PackageRegistry.MetricsCalculation
             httpClient.BaseAddress = new Uri("https://api.github.com/");
             httpClient.DefaultRequestHeaders.Accept.Clear();
             httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github+json"));
-            httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("AppName", "1.0"));
+            httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("my-cool-cli", "1.0"));
 
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Token", access_token);
 
@@ -482,7 +509,7 @@ namespace PackageRegistry.MetricsCalculation
                 string responseContent = await response.Content.ReadAsStringAsync();
                 // Deserialize the response content to an array of commit objects
                 var commits = Newtonsoft.Json.JsonConvert.DeserializeObject<Commit[]>(responseContent);
-                Program.LogDebug($"Total commits retreived in the repository {owner}/{repo}: {commits.Length}");
+                parentLibrary.LogInfo($"Total commits retreived in the repository {owner}/{repo}: {commits.Length}");
 
                 int num_commits = commits.Length;
                 int num_pr_commits = 0;
@@ -492,7 +519,7 @@ namespace PackageRegistry.MetricsCalculation
                     // Console.WriteLine($"Commit Message: {commit.commit.Message}");
                     if (commit.commit.Message.Contains("PR-URL") || commit.commit.Message.Contains("pull request"))
                     {
-                        // Program.LogDebug("PULL REQUEST REVEIWED");
+                        // parentLibrary.LogDebug("PULL REQUEST REVEIWED");
                         num_pr_commits++;
                     }
                     // Console.WriteLine($"Commit Author: {commit.commit.Author.Name}");
@@ -501,10 +528,11 @@ namespace PackageRegistry.MetricsCalculation
                 }
 
                 this.score = ((float)num_pr_commits) / num_commits;
+                parentLibrary.LogInfo($"Found {num_commits} commits");
             }
             else
             {
-                Program.LogError($"Failed to get commits. Status code: {response.StatusCode}");
+                parentLibrary.LogError($"Failed to get commits. Status code: {response.StatusCode}");
             }
         }
 
@@ -530,6 +558,144 @@ namespace PackageRegistry.MetricsCalculation
             public string Name { get; set; }
             public DateTimeOffset Date { get; set; }
             // Add more properties as needed
+        }
+    }
+
+
+    public class GoodPinningPractice : Metric
+    {
+        HttpClient httpClient = new HttpClient();
+        // readonly int PER_PAGE = 1000;
+        public GoodPinningPractice(MetricsCalculator parentLibrary) : base(parentLibrary)
+        {
+            this.weight = 1;
+            this.name = "goodPinningPractice";
+        }
+
+        private float sigmoid(float x)
+        {
+            return 1 / (1 + (float)Math.Exp(-x));
+        }
+
+        public override async Task Calculate()
+        {
+
+            string token = Environment.GetEnvironmentVariable("GITHUB_TOKEN");
+            string owner = this.parentLibrary.owner;
+            string repo = this.parentLibrary.name;
+
+            // Set the repository owner, repository name, and path to the package.json file
+            string path = "package.json";
+
+
+
+            // Create a HttpClient with the authorization header set to the personal access token
+            var client = httpClient;
+            httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("my-cool-cli", "1.0"));
+            client.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
+
+            // Send the GET request to retrieve the contents of the package.json file
+            var response = await client.GetAsync($"https://api.github.com/repos/{owner}/{repo}/contents/{path}");
+            var responseString = await response.Content.ReadAsStringAsync();
+
+
+
+            // parentLibrary.LogInfo(responseString);
+
+
+            if (responseString[0] != '{')
+            {
+                parentLibrary.LogError("no package.json found in " + owner + "/" + repo);
+                this.score = 0.0F;
+            }
+            else
+            {
+
+                try
+                {
+                    // Parse the response JSON and extract the content of the package.json file
+                    var contentObj = JsonSerializer.Deserialize<JsonElement>(responseString);
+                    var contentBytes = Convert.FromBase64String(contentObj.GetProperty("content").GetString());
+                    var content = Encoding.UTF8.GetString(contentBytes);
+
+                    // Parse the package.json file content as a JSON object and extract the dependencies
+                    var packageJson = JsonSerializer.Deserialize<JsonElement>(content);
+
+                    int dependencyCount = 0, numNotPinned = 0;
+                    try
+                    {
+                        System.Text.Json.JsonElement dependencies = packageJson.GetProperty("dependencies");
+
+                        // Print the dependencies and their versions
+                        // parentLibrary.LogDebug("Dependencies:");
+
+                        foreach (var dependency in dependencies.EnumerateObject())
+                        {
+                            // parentLibrary.LogDebug($"{dependency.Name}: {dependency.Value.GetString()}");
+                            dependencyCount++;
+
+                            string[] versions = dependency.Value.GetString().Split(".");
+                            if (dependency.Value.GetString().Contains("^") || dependency.Value.GetString().Contains("~") || dependency.Value.GetString().Contains("*") || versions[0].Contains("x") || versions[1].Contains("x"))
+                            {
+                                // parentLibrary.LogDebug("not pinned");
+                                numNotPinned++;
+                            }
+                        }
+                    }
+                    catch (KeyNotFoundException e)
+                    {
+                        parentLibrary.LogInfo($"no dependancies found in {owner}/{repo}");
+                    } // move on if the package.json doesn't have a dependancies section
+
+                    try
+                    {
+                        System.Text.Json.JsonElement dev_dependencies = packageJson.GetProperty("devDependencies");
+
+                        // Print the dependencies and their versions
+                        // parentLibrary.LogDebug("Dependencies:");
+
+                        foreach (var dependency in dev_dependencies.EnumerateObject())
+                        {
+                            // parentLibrary.LogDebug($"{dependency.Name}: {dependency.Value.GetString()}");
+                            dependencyCount++;
+
+                            string[] versions = dependency.Value.GetString().Split(".");
+                            if (dependency.Value.GetString().Contains("^") || dependency.Value.GetString().Contains("~") || dependency.Value.GetString().Contains("*") || versions[0].Contains("x") || versions[1].Contains("x"))
+                            {
+                                // parentLibrary.LogDebug("not pinned");
+                                numNotPinned++;
+                            }
+                        }
+                    }
+                    catch (KeyNotFoundException e)
+                    {
+                        parentLibrary.LogInfo($"no dev dependancies found in {owner}/{repo}");
+                    } // move on if the package.json doesn't have a dev_dependancies section
+
+                    // // Extract and print the dev dependencies
+                    // var devDependencies = packageJson.GetProperty("devDependencies");
+                    // parentLibrary.LogDebug("Dev Dependencies:");
+                    // foreach (var devDependency in devDependencies.EnumerateObject())
+                    // {
+                    //     parentLibrary.LogDebug($"{devDependency.Name}: {devDependency.Value.GetString()}");
+                    // }
+
+                    if (dependencyCount == 0)
+                    {
+                        this.score = 1.0F;
+                    }
+                    else
+                    {
+                        parentLibrary.LogInfo(dependencyCount + " dependencies found in " + owner + "/" + repo);
+                        this.score = 1 - ((float)numNotPinned) / dependencyCount;
+                    }
+                }
+                catch (Exception e)
+                {
+                    parentLibrary.LogError(owner + "/" + repo + " had an invalid package.json file");
+                    this.score = 0.0F;
+                }
+            }
         }
     }
 }

@@ -4,51 +4,51 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using PackageRegistry.Models;
 
 namespace PackageRegistry.MetricsCalculation
 {
     public class MetricsCalculator
     {
-
+        public static readonly short ERROR_SUCCESS = 0;
+        public static readonly short ERROR_WARNING = 1;
+        public static readonly short ERROR_ERROR = 2;
         public string url;
         public string owner, name;
 
         public float score = -1;
 
+        public int error_level = ERROR_SUCCESS;
+        public string error_message = "";
+
         private List<Metric> metrics = new List<Metric>();
+
+        public Metric RampUp, Correctness, BusFactor, ResponsiveMaintainer, LicenseScore, PullRequest, GoodPinningPractice;
         public List<Task> calcMetricTaskQueue = new List<Task>();
 
         public MetricsCalculator(string url)
         {
 
-            url = url.Contains("npmjs") ? GetUrlFromNpmUrl(url) : url;
-            this.url = url;
-
-            // get the user name and repository name
-            string[] phrases = url.Split("/");
-            if (phrases.Length <= 2)
-            {
-                Program.LogError("Invalid github url: " + url);
-                this.owner = "invalid";
-                this.name = "invalid";
-            }
-            else
-            {
-                this.owner = phrases[phrases.Length - 2];
-                this.name = phrases[phrases.Length - 1];
-                if (this.name.Contains(".git"))
-                {
-                    this.name = this.name.Substring(0, this.name.Length - 4);
-                }
-            }
+            this.url = url.Contains("npmjs") ? Package.GetUrlFromNpmUrl(url) : url;
+            (this.owner, this.name) = Package.GetOwnerAndNameFromURL(this.url);
 
             // add metrics to metric list 
-            metrics.Add(new RampUp(this));
-            metrics.Add(new Correctness(this));
-            metrics.Add(new BusFactor(this));
-            metrics.Add(new ResponsiveMaintainer(this));
-            metrics.Add(new LicenseMetric(this));
-            metrics.Add(new PRRatio(this));
+            RampUp = new RampUp(this);
+            Correctness = new Correctness(this);
+            BusFactor = new BusFactor(this);
+            ResponsiveMaintainer = new ResponsiveMaintainer(this);
+            LicenseScore = new LicenseScore(this);
+            PullRequest = new PullRequest(this);
+            GoodPinningPractice = new GoodPinningPractice(this);
+
+            metrics.Add(BusFactor);
+            metrics.Add(Correctness);
+            metrics.Add(RampUp);
+            metrics.Add(ResponsiveMaintainer);
+            metrics.Add(LicenseScore);
+            metrics.Add(GoodPinningPractice);
+            metrics.Add(PullRequest);
+
 
             // start the metrics calculating
             foreach (Metric m in metrics)
@@ -73,7 +73,7 @@ namespace PackageRegistry.MetricsCalculation
         public string ToOutput()
         {
 
-            string jsonBlob = "{ \"URL\":\"" + this.url + "\", \"NET_SCORE\":" + Math.Round(this.score, 2);
+            string jsonBlob = "{ \"URL\":\"" + this.url + "\", \"netScore\":" + Math.Round(this.score, 2);
             foreach (Metric m in metrics)
             {
                 jsonBlob += ", \"" + m.name + "\":" + m.GetScore();
@@ -121,50 +121,33 @@ namespace PackageRegistry.MetricsCalculation
         }
 
 
-        private async static Task<string> scrapeForGitUrl(string url)
+        public void LogDebug(string message)
         {
-
-            // get package name from url
-            string[] phrases = url.Split("/");
-            string packageName = phrases[phrases.Length - 1];
-
-            using var client = new HttpClient();
-
-            var result = await client.GetStringAsync("https://registry.npmjs.org/" + packageName);
-
-            // HACK this may be the least robust possible way of doing this 
-            string[] tokens = result.Split("\"");
-            foreach (string s in tokens)
+            Program.LogDebug(message);
+        }
+        public void LogInfo(string message)
+        {
+            Program.LogInfo(message);
+        }
+        public void LogError(string message)
+        {
+            if (error_level <= ERROR_ERROR)
             {
-                if (s.Contains("github.com"))
-                {
-                    return s;
-                }
+                error_message = message;
+                error_level = ERROR_ERROR;
             }
-
-            return "no_url_found";
-
+            Program.LogError(message);
         }
 
-        public static string GetUrlFromNpmUrl(string url)
+        public void LogWarning(string message)
         {
-
-            Task<string> urlScrape = scrapeForGitUrl(url);
-
-            try
+            if (error_level <= ERROR_WARNING)
             {
-                urlScrape.Wait(TimeSpan.FromSeconds(Program.REQUEST_TIMEOUT_TIME));
+                error_message = message;
+                error_level = ERROR_WARNING;
             }
-            catch (AggregateException)
-            { // probably a 404 error
-                Program.LogError("Invalid library url: " + url);
-                return null;
-            }
-            string gitUrl = urlScrape.Result;
-
-            return gitUrl;
+            Program.LogWarning(message);
         }
-
-
     }
+
 }
